@@ -220,135 +220,165 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col items-center space-y-4">
-          {/* Clock & Timer Presentation */}
-          <div className="flex flex-col items-center select-none w-full">
-            {/* Analog Clock - Hidden on small mobile to keep inputs above fold without scrolling */}
-            <div className="hidden sm:block my-1 shrink-0">
-              <AnalogClock
-                remainingSeconds={remainingSeconds}
-                totalSeconds={totalSeconds}
-                size={180}
-                bgColor={theme.primary}
-              />
-            </div>
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 flex flex-col items-center space-y-3 sm:space-y-4">
+          {!isRunning ? (
+            /* === SETUP / SITTING DOWN MODE: DURATION & TASK DIRECTLY VISIBLE WITHOUT SCROLLING === */
+            <div className="w-full space-y-3 animate-fade-in">
+              {/* PRIMARY: Duration Definition Box */}
+              <div className="w-full bg-black/30 p-3 sm:p-4 rounded-2xl border border-white/10 space-y-2.5 shadow-inner">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-amber-400" />
+                    <span>⏱️ Süre Belirleme</span>
+                  </label>
+                  <span className="text-[11px] font-mono font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                    {inputWork || 25} dk Odak · {inputBreak || 5} dk Mola
+                  </span>
+                </div>
 
-            {/* Digital Timer */}
-            <div className="mt-1 text-4xl sm:text-5xl font-extrabold tracking-tight font-mono text-white select-none">
-              {formatRemainingSeconds(remainingSeconds)}
-            </div>
+                {/* Quick Preset Buttons (Large, comfortable touch targets) */}
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: '25 / 5 dk', w: 25, b: 5, desc: 'Klasik' },
+                    { label: '50 / 10 dk', w: 50, b: 10, desc: 'Derin Odak' },
+                    { label: '90 / 15 dk', w: 90, b: 15, desc: 'Blok Etüt' },
+                  ].map(preset => {
+                    const isSelected =
+                      parseInt(inputWork, 10) === preset.w && parseInt(inputBreak, 10) === preset.b;
+                    return (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => handlePreset(preset.w, preset.b)}
+                        className={`py-2 px-1 sm:px-2 rounded-xl text-xs font-bold transition border text-center flex flex-col items-center justify-center gap-0.5 ${
+                          isSelected
+                            ? 'bg-blue-600 border-blue-400 text-white shadow-lg ring-1 ring-blue-400 scale-[1.02]'
+                            : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white'
+                        }`}
+                      >
+                        <span className="text-xs font-extrabold">{preset.label}</span>
+                        <span className="text-[9px] opacity-75 font-normal">{preset.desc}</span>
+                      </button>
+                    );
+                  })}
+                </div>
 
-            {/* Status Label */}
-            <div
-              className={`text-xs sm:text-sm font-semibold tracking-wide ${
-                isWorkTime ? 'text-emerald-400' : 'text-sky-400'
-              }`}
-            >
-              {statusText}
-            </div>
+                {/* Custom Minutes Inputs */}
+                <div className="flex items-center justify-around gap-2 bg-black/40 p-2 rounded-xl border border-white/10 text-xs text-slate-300">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-400 font-medium">Çalışma:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="180"
+                      value={inputWork}
+                      onChange={(e) => {
+                        setInputWork(e.target.value);
+                        const val = parseInt(e.target.value, 10);
+                        if (val > 0) setWorkMinutes(val);
+                      }}
+                      className="w-14 px-2 py-1 rounded-lg bg-black/60 border border-white/20 focus:border-amber-400 text-center font-bold text-white text-xs outline-none"
+                    />
+                    <span className="text-slate-400 text-[11px]">dk</span>
+                  </div>
 
-            {/* Upcoming Event Ticker */}
-            {upcomingEventStr && (
+                  <div className="w-[1px] h-5 bg-white/10" />
+
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-400 font-medium">Mola:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="60"
+                      value={inputBreak}
+                      onChange={(e) => {
+                        setInputBreak(e.target.value);
+                        const val = parseInt(e.target.value, 10);
+                        if (val > 0) setBreakMinutes(val);
+                      }}
+                      className="w-14 px-2 py-1 rounded-lg bg-black/60 border border-white/20 focus:border-sky-400 text-center font-bold text-white text-xs outline-none"
+                    />
+                    <span className="text-slate-400 text-[11px]">dk</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Task Input Section */}
+              <div className="w-full bg-black/30 p-3 sm:p-4 rounded-2xl border border-white/10 space-y-1.5">
+                <label className="text-xs font-bold text-white block">
+                  ✍️ Çalışma Göreviniz:
+                </label>
+                <input
+                  type="text"
+                  placeholder="Örn: Matematik Soru Çözümü, Tez Yazımı..."
+                  value={inputTask}
+                  onChange={(e) => {
+                    setInputTask(e.target.value);
+                    setErrorMessage('');
+                  }}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 focus:border-blue-500 text-xs sm:text-sm text-white placeholder-slate-400 outline-none transition"
+                />
+                {errorMessage && (
+                  <p className="text-xs text-rose-400 font-medium pt-1">{errorMessage}</p>
+                )}
+              </div>
+
+              {/* Upcoming Event Ticker (if any) */}
+              {upcomingEventStr && (
+                <div
+                  className="text-[11px] font-bold px-3 py-1 rounded-xl bg-white/5 border border-white/10 truncate max-w-full text-center"
+                  style={{ color: theme.textAccent }}
+                >
+                  📅 {upcomingEventStr}
+                </div>
+              )}
+            </div>
+          ) : (
+            /* === RUNNING SESSION MODE: BIG COUNTDOWN & CLOCK === */
+            <div className="w-full flex flex-col items-center space-y-3 sm:space-y-4 animate-fade-in">
+              {/* Analog Clock on sm+ screens */}
+              <div className="hidden sm:block my-1 shrink-0">
+                <AnalogClock
+                  remainingSeconds={remainingSeconds}
+                  totalSeconds={totalSeconds}
+                  size={170}
+                  bgColor={theme.primary}
+                />
+              </div>
+
+              {/* Digital Timer */}
+              <div className="mt-1 text-5xl font-extrabold tracking-tight font-mono text-white select-none">
+                {formatRemainingSeconds(remainingSeconds)}
+              </div>
+
+              {/* Status Label */}
               <div
-                className="mt-1.5 text-[11px] font-bold px-3 py-0.5 rounded-full bg-white/5 border border-white/10 truncate max-w-full"
-                style={{ color: theme.textAccent }}
+                className={`text-xs sm:text-sm font-semibold tracking-wide ${
+                  isWorkTime ? 'text-emerald-400' : 'text-sky-400'
+                }`}
               >
-                📅 {upcomingEventStr}
-              </div>
-            )}
-          </div>
-
-          {/* PRIMARY WORKFLOW: Task Input & Duration Definition */}
-          <div className="w-full bg-black/25 p-3.5 sm:p-4 rounded-2xl border border-white/10 space-y-3">
-            {/* Task Input */}
-            <div>
-              <label className="text-[11px] font-semibold text-slate-300 block mb-1">
-                ✍️ Çalışma Görevi:
-              </label>
-              <input
-                type="text"
-                placeholder="Örn: Matematik Soru Çözümü, Tez Yazımı..."
-                value={inputTask}
-                disabled={isRunning}
-                onChange={(e) => {
-                  setInputTask(e.target.value);
-                  setErrorMessage('');
-                }}
-                className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl bg-black/40 border border-white/15 focus:border-blue-500 text-xs sm:text-sm text-white placeholder-slate-400 outline-none transition disabled:opacity-60"
-              />
-            </div>
-
-            {/* Error notification */}
-            {errorMessage && (
-              <p className="text-xs text-rose-400 font-medium">{errorMessage}</p>
-            )}
-
-            {/* Duration Presets & Inputs */}
-            <div>
-              <label className="text-[11px] font-semibold text-slate-300 block mb-1.5">
-                ⏱️ Süre Belirleme:
-              </label>
-
-              {/* Quick Preset Buttons */}
-              <div className="grid grid-cols-3 gap-2 mb-2.5">
-                {[
-                  { label: '25 / 5 dk', w: 25, b: 5 },
-                  { label: '50 / 10 dk', w: 50, b: 10 },
-                  { label: '90 / 15 dk', w: 90, b: 15 },
-                ].map(preset => {
-                  const isSelected =
-                    parseInt(inputWork, 10) === preset.w && parseInt(inputBreak, 10) === preset.b;
-                  return (
-                    <button
-                      key={preset.label}
-                      disabled={isRunning}
-                      onClick={() => handlePreset(preset.w, preset.b)}
-                      className={`py-2 px-2 rounded-xl text-xs font-bold transition border text-center ${
-                        isSelected
-                          ? 'bg-blue-600 border-blue-400 text-white shadow-md'
-                          : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
-                      } disabled:opacity-50`}
-                    >
-                      {preset.label}
-                    </button>
-                  );
-                })}
+                {statusText}
               </div>
 
-              {/* Custom Minutes Inputs */}
-              <div className="flex items-center justify-around gap-2 bg-black/30 p-2 rounded-xl border border-white/10 text-xs text-slate-300">
-                <div className="flex items-center gap-1.5">
-                  <span>Çalışma:</span>
-                  <input
-                    type="number"
-                    min="1"
-                    max="180"
-                    disabled={isRunning}
-                    value={inputWork}
-                    onChange={(e) => setInputWork(e.target.value)}
-                    className="w-14 px-2 py-1 rounded-lg bg-black/50 border border-white/20 text-center font-bold text-white outline-none disabled:opacity-50"
-                  />
-                  <span className="text-slate-400 text-[11px]">dk</span>
+              {/* Active Task Info */}
+              <div className="w-full bg-black/30 p-3 rounded-2xl border border-white/10 text-center">
+                <span className="text-[11px] text-slate-400 font-medium">Şu Anki Görev:</span>
+                <p className="text-sm font-bold text-white mt-0.5 truncate">
+                  {currentTask || 'Odaklanma Seansı'}
+                </p>
+              </div>
+
+              {/* Upcoming Event Ticker */}
+              {upcomingEventStr && (
+                <div
+                  className="mt-1 text-[11px] font-bold px-3 py-0.5 rounded-full bg-white/5 border border-white/10 truncate max-w-full"
+                  style={{ color: theme.textAccent }}
+                >
+                  📅 {upcomingEventStr}
                 </div>
-
-                <div className="w-[1px] h-5 bg-white/10" />
-
-                <div className="flex items-center gap-1.5">
-                  <span>Mola:</span>
-                  <input
-                    type="number"
-                    min="1"
-                    max="60"
-                    disabled={isRunning}
-                    value={inputBreak}
-                    onChange={(e) => setInputBreak(e.target.value)}
-                    className="w-14 px-2 py-1 rounded-lg bg-black/50 border border-white/20 text-center font-bold text-white outline-none disabled:opacity-50"
-                  />
-                  <span className="text-slate-400 text-[11px]">dk</span>
-                </div>
-              </div>
+              )}
             </div>
-          </div>
+          )}
 
           {/* SECONDARY: Collapsible Daily Goals & Progress */}
           <div className="w-full">
