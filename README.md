@@ -1,138 +1,98 @@
-# İlim Yuvası — Sosyal Pomodoro Web Uygulaması 📚⏱️
+# 🏛️ İlim Yuvası — Sosyal Pomodoro ve Sanal Kütüphane
 
-Python CustomTkinter masaüstü Pomodoro V0.3 uygulamasının tüm çekirdek işlevleri, veritabanı mantığı ve estetiği korunarak; **React 19 + TypeScript + Tailwind CSS** ile modern, çok kullanıcılı bir **sosyal çalışma ve odaklanma ortamına** dönüştürülmüş halidir.
+> **"Sessizlik bilgeliğin başlangıcıdır. Birlikte otur, odaklan ve üret."**
 
----
-
-## 🌟 Öne Çıkan Özellikler
-
-### 1. 🏛️ İlim Yuvası Salonu & 4 Kişilik Masalar
-- 8 adet 4 kişilik ahşap çalışma masası, yeşil deri sümen (`desk-mat`), vintage pirinç bankacı lambaları (`lamp-glow`) ve sessiz kütüphane dekoru.
-- Boş bir sandalyeye tıklayarak oturma, pomodoro süresini seçme ve başlatma.
-- Masada çalışan diğer kullanıcıları **canlı animasyonlu karakterler** olarak görme (body-doubling / co-working odak deneyimi).
-- Sandalye üstünde canlı minik pomodoro süre halkası ve odaklanılan görev etiketi.
-- Kütüphane sessizliğini bozmayan **emoji mikro-etkileşimleri** (👋, ☕, 🔥, 👏, 📖, ✨).
-- Dahili Web Audio API ile sıfır harici dosya yüküyle üretilen **Ortam Sesleri**: Cama Vuran Yağmur, Şömine Çatırtısı, Sessiz Salon Mırıltısı.
-
-### 2. 🎨 Modüler Katmanlı SVG Avatar Stüdyosu
-- Modüler vektörel karakter motoru (Sıfır ağır oyun motoru yükü, Retina/4K ekranlarda sonsuz keskinlik).
-- 5 ten rengi tonu, 8 saç modeli, 8 saç rengi, 6 kıyafet türü ve 8 rengi, gözlük/kulaklık aksesuarları ve masaüstü eşyaları (sıcak kahve, çay, laptop, kitap yığını, sukulent bitki).
-- Canlı 3 animasyon durumu: Boşta (`idle`), odaklanmış çalışma/yazı yazma (`anim-typing`), molada fincan yudumlama (`anim-sip`).
-- Karakter Tasarım Stüdyosu (`AvatarCustomizer`): Canlı animasyon önizlemesi ve tek tıkla rastgele karakter oluşturucu.
-
-### 3. ⏱️ Masaüstünden Birebir Aktarılan Pomodoro Motoru
-- **Analog Saat (`AnalogClock`):** Python CustomTkinter versiyonundaki beyaz çember, saat işaretleri, dakika ibresi (`#59A5CF`), kırmızı saniye ibresi ve merkez pivot noktasıyla birebir uyumlu canvas çizimi.
-- **Dijital Saat:** Geniş fontlu canlı sayaç ("25:00").
-- **Dinamik Arka Plan Baloncukları (`FloatingBubbles`):** Masaüstü versiyonundaki 20 adet optimize yüzen baloncuk animasyonu.
-- **Ardışık Çalışma ↔ Mola Döngüsü:** Çalışma süresi bitince otomatik mola başlatma, seans bitiş zili ve konfeti kutlaması.
-- **5 Renk Teması:** Varsayılan (`#1E1E2E`), Mavi (`#0F172A`), Yeşil (`#14271A`), Kırmızı (`#2C1111`), Mor (`#1E112A`).
-- **Ses Ayarları & Özel Ses Yükleme:** Dahili uyarı alarmı, bip sesi, köpek sesi ve meditasyon zili + kullanıcının kendi ses dosyasını (`.mp3`, `.wav`) tarayıcıya yükleyip seçebilmesi.
-
-### 4. 📜 Geçmiş, Takvim, Hedefler ve İstatistikler
-- **Geçmiş (History):** İki panelli tarih listesi ve seans detay kartları (İş tanımı, süre, başlangıç-bitiş saatleri, seans türü).
-- **Takvim (Calendar):** Otomatik formatlanan GG/AA/YYYY ve SS:DD girişleri, geçmiş tarih koruması, canlı geri sayım ("X ay, Y gün kaldı" / "Geçti").
-- **Hedefler (Goals):** Tarih gezgini (`< Önceki`, `Bugün`, `Sonraki >`), Görev Bazlı yapılacaklar listesi ve Süre Bazlı hedef belirleme, geçmiş günlerin başarı raporları.
-- **İstatistikler (Stats):** Günlük, Haftalık, Aylık ve Yıllık periyotlar; 4 özet kartı (Toplam Süre, Ortalama, En İyi Gün, Aktif Gün Sayısı) ve dinamik aktivite çubuk grafiği (bugünün çubuğu yeşil, diğerleri mavi).
+Tek başına çalışırken motivasyonunu korumakta veya dikkatini toplamakta zorlanıyor musun?  
+**İlim Yuvası**, gerçek bir kütüphanenin huzurlu ve ilham verici atmosferini ekranına taşıyan, 4 kişilik masalarda arkadaşlarınla veya diğer öğrencilerle **birlikte çalışma (body-doubling / co-working)** deneyimi yaşatan yeni nesil bir sosyal Pomodoro alanıdır.
 
 ---
 
-## 🚀 Yerel Geliştirme (Local Development)
+## ✨ Neden İlim Yuvası?
 
-```bash
-# Bağımlılıkları yükleyin
-npm install
+- 🪑 **Sanal 4 Kişilik Masalar:** Boş bir sandalyeye otur, çalışma hedefini belirle ve masandaki diğer insanlarla aynı anda odaklanmanın gücünü hisset.
+- 🎨 **Kişisel Karakter Tasarımı:** Ten renginden saç modeline, kıyafetinden masandaki sıcak kahveye ve dizüstü bilgisayarına kadar seni temsil eden avatarını dilediğince özelleştir.
+- ✍️ **Canlı Çalışma Animasyonları:** Süreyi başlattığında karakterin masaya eğilip odaklanarak yazı yazar; mola verdiğinde ise kahvesini yudumlar.
+- 🌧️ **Huzur Veren Ortam Sesleri:** Cama vuran yağmur damlaları, hafif şömine çıtırtısı veya sessiz kütüphane uğultusuyla dış dünyanın gürültüsünü kapat.
+- 👋 **Sessiz Kütüphane İletişimi:** Dikkat dağıtan sohbet pencereleri yerine; masadakilere motivasyon veren sessiz emoji tepkileri (Selam, Kahve, Ateşli Odak, Alkış).
 
-# Geliştirme sunucusunu başlatın
-npm run dev
+---
+
+## 🚀 3 Adımda Kolay Kullanım
+
+```
+ [1. Masanı Seç]  👉  [2. Süreni & Görevini Belirle]  👉  [3. Odaklan ve Bitir!]
+ Boş sandalyeye tıkla    25/5, 50/10 veya özel süre         Mola döngüsü ve konfeti kutlaması
 ```
 
-Uygulama tarayıcınızda açılacaktır. İki farklı sekme açarak kütüphanede aynı anda masaya oturup gerçek zamanlı animasyonları hemen test edebilirsiniz!
+1. **Masanı Seç:** Kütüphane salonundaki 8 adet 4 kişilik masadan dilediğin boş bir sandalyeye tıkla.
+2. **Hedefini Gir:** "Şu anki göreviniz nedir?" kutusuna üzerinde çalışacağın konuyu yaz ve çalışma/mola sürelerini seç (25/5 dk, 50/10 dk veya dilediğin süre).
+3. **Başlat:** Masaya otur ve çalışmaya başla! Süren bittiğinde meditasyon zili çalar, konfeti kutlaması eşliğinde otomatik olarak mola seansına geçilir.
 
 ---
 
-## 🌐 GitHub Pages Üzerinde Dağıtım (Deploy)
+## 🎯 Öne Çıkan Özellikler
 
-Uygulama, kalıcı bir Node.js sunucusuna ihtiyaç duymadan **GitHub Pages** üzerinde statik olarak çalışacak şekilde (`base: './'`) tasarlanmıştır:
+### ⏱️ Çift Zamanlayıcı (Analog Kadran + Dijital Gösterge)
+Klasik saat tutkunları için ince detaylarla işlenmiş analog saat kadranı (saat çizgileri, dakika ve kırmızı saniye ibresi) ile büyük fontlu dijital geri sayım sayacı bir arada.
 
-1. Depoyu GitHub'a push edin:
-   ```bash
-   git add .
-   git commit -m "feat: İlim Yuvası tam sürüm"
-   git push origin main
-   ```
-2. `.github/workflows/deploy.yml` dosyasındaki GitHub Actions iş akışı otomatik olarak tetiklenir, projeyi derler ve `github-pages` dalına dağıtır.
-3. GitHub deponuzun **Settings -> Pages** menüsünde Source olarak **GitHub Actions** seçildiğinden emin olun.
+### 🎨 Karakter Stüdyosu
+- **5 Ten Rengi & 8 Saç Modeli:** Kısa, kıvırcık, dalgalı, küt, topuz, at kuyruğu, dikenli veya kel saç seçenekleri.
+- **Kıyafetler & Renkler:** Kapüşonlu, kazak, gömlek, ceket, tişört veya hırka.
+- **Aksesuarlar:** Şık kare veya yuvarlak gözlükler, ışıklı kulaklık, bere veya atkı.
+- **Masa Eşyaları:** Sıcak kahve, bitki çayı, açık laptop, kitap yığını veya sukulent bitki.
+
+### 📜 Geçmiş Seans Günlüğü
+Hangi gün kaç dakika çalıştın, kaç dakika mola verdin? Tüm seansların iş tanımı, başlangıç/bitiş saatleri ve haftanın gününe göre sol ve sağ detay panellerinde düzenli olarak listelenir.
+
+### 📅 Takvim & Etkinlik Geri Sayımı
+Yaklaşan sınavın, proje teslim tarihin veya hedefin için etkinlik ekle. Ana ekranda ve takvimde `"Vize Sınavı: 12 gün, 4 sa kaldı"` gibi canlı geri sayım bildirimleriyle hedefini gözünün önünde tut.
+
+### 🎯 Günlük Görev ve Süre Hedefleri
+- **Görev Bazlı:** Gün içinde tamamlayacağın maddeleri yaz, bitirdikçe üzerini çiz.
+- **Süre Bazlı:** Bugün için hedeflediğin çalışma dakikasını (örneğin 120 dk) belirle ve ilerleme çubuğunun doluşunu izle.
+- **Geçmiş Raporlar:** Takvimden geçmiş günleri seçerek o günkü hedeflerinin yüzde kaçını tamamladığını incele.
+
+### 📊 Kapsamlı İstatistikler & Grafik
+- Günlük, Haftalık, Aylık ve Yıllık periyotlar.
+- **4 Özet Kartı:** Toplam Süre, Seans Başına Ortalama, En İyi Gün/Dönem ve Aktif Çalışma Sayısı.
+- Bugünün çubuğunu yeşil, geçmiş günleri mavi gösteren interaktif aktivite çubuk grafiği.
+
+### 🎨 5 Göz Yormayan Tema
+Karanlık ve sakin çalışma ortamları için özenle seçilmiş renk paletleri:
+- **Varsayılan** (Modern Gece Arduvazı)
+- **Mavi** (Derin Okyanus)
+- **Yeşil** (Huzurlu Orman)
+- **Kırmızı** (Sıcak Tuğla)
+- **Mor** (Mistik Gece)
 
 ---
 
-## 🔥 Firebase Kurulum Adımları (Adım Adım Rehber)
+## 🤫 Kütüphane Adabı (Çalışma Kültürü)
 
-Uygulama, Firebase bilgileri girilmemiş olsa dahi **Çoklu-Sekme Yerel Senkronizasyon (BroadcastChannel)** moduyla tam fonksiyonel çalışır. Gerçek zamanlı bulut eşzamanlaması ve kullanıcı hesapları için aşağıdaki adımları izleyin:
+İlim Yuvası, derin odaklanmayı (Deep Work) korumak için tasarlanmıştır:
+- **Sessizlik esastır:** Kullanıcılar arasında dikkat dağıtıcı sohbet kutusu bulunmaz.
+- **Mikro Etkileşimler:** Bir arkadaşına destek olmak veya masadakilere kolay gelsin demek için masada otururken beliren emoji çubuğunu kullanabilirsin (👋 Selam, ☕ Kahve, 🔥 Ateşli Odak, 👏 Tebrik, ✨ İlham).
+- **Saygı:** Masadan kalktığında sandalyen diğer çalışmak isteyenler için otomatik olarak serbest kalır.
 
-### Adım 1: Firebase Projesi Oluşturma
-1. [Firebase Console](https://console.firebase.google.com/) adresine gidin ve Google hesabınızla giriş yapın.
-2. **"Proje ekle"** (Add project) butonuna tıklayın.
-3. Proje adını girin (Örn: `ilim-yuvasi`). Google Analytics isteğe bağlıdır; adımları tamamlayıp projeyi oluşturun.
+---
 
-### Adım 2: Web Uygulaması Ekleyin ve Yapılandırma Bilgilerini Alın
-1. Proje genel bakış sayfasında **Web (`</>`)** simgesine tıklayın.
-2. Uygulama takma adı girin (Örn: `Ilim Yuvasi Web`).
-3. Size verilen `firebaseConfig` objesindeki bilgileri kopyalayın:
-   - `apiKey`
-   - `authDomain`
-   - `projectId`
-   - `storageBucket`
-   - `messagingSenderId`
-   - `appId`
+## 📱 Cihaz Desteği
 
-### Adım 3: Authentication (Kimlik Doğrulama) Aktifleştirme
-1. Sol menüden **Build -> Authentication** sekmesine gidin ve **"Başlayın"** (Get Started) deyin.
-2. **Sign-in method** sekmesinden:
-   - **E-posta/Şifre (Email/Password):** Tıklayıp **"Etkinleştir"** yapın ve kaydedin.
-   - **Google:** İsteğe bağlı olarak etkinleştirip destek e-postanızı seçin.
+İlim Yuvası tamamen duyarlı (responsive) tasarlanmıştır:
+- Masaüstü bilgisayarlarda geniş ekran kütüphane deneyimi.
+- Tabletlerde ferah iki sütunlu yerleşim.
+- Cep telefonlarında pratik tek parmakla kullanım ve yerel uygulama hissi veren alt gezinti çubuğu.
 
-### Adım 4: Cloud Firestore Veritabanını Oluşturma
-1. Sol menüden **Build -> Firestore Database** sekmesine gidin ve **"Veritabanı oluştur"** deyin.
-2. Konum olarak `eur3 (europe-west)` veya size en yakın bölgeyi seçin.
-3. Güvenlik kuralları için **Test modunda başlat** veya aşağıdaki üretim kurallarını yapıştırın:
-   ```javascript
-   rules_version = '2';
-   service cloud.firestore {
-     match /databases/{database}/documents {
-       match /users/{userId}/{document=**} {
-         allow read, write: if request.auth != null && request.auth.uid == userId;
-       }
-     }
-   }
-   ```
+---
 
-### Adım 5: Realtime Database (Canlı Masa Presence Katmanı)
-1. Sol menüden **Build -> Realtime Database** sekmesine gidin ve **"Veritabanı oluştur"** deyin.
-2. Konum olarak Belçika (`europe-west1`) veya ABD seçebilirsiniz.
-3. Kurallar (**Rules**) sekmesine gidin ve aşağıdaki kuralı yapıştırıp **"Yayınla"** (Publish) deyin:
-   ```json
-   {
-     "rules": {
-       "rooms": {
-         ".read": true,
-         ".write": true
-       }
-     }
-   }
-   ```
-4. Veritabanı URL'sini kopyalayın (Örn: `https://ilim-yuvasi-default-rtdb.europe-west1.firebasedatabase.app`).
+## 🔒 Üyelik ve Giriş Seçenekleri
 
-### Adım 6: Bilgileri Uygulamaya Tanımlama (İki Kolay Yol)
-- **Yol A (Uygulama İçinden - En Kolayı):**
-  Uygulamayı açın, sağ üstteki profil simgesine tıklayın -> **"Bulut"** sekmesine geçin -> Firebase bilgilerinizi yapıştırıp **"Kaydet ve Bağlan"** butonuna basın!
-- **Yol B (.env Dosyası ile):**
-  Proje dizinindeki `.env.example` dosyasını kopyalayıp `.env` adıyla kaydedin ve bilgileri yazın:
-  ```env
-  VITE_FIREBASE_API_KEY=AIzaSy...
-  VITE_FIREBASE_AUTH_DOMAIN=ilim-yuvasi.firebaseapp.com
-  VITE_FIREBASE_DATABASE_URL=https://ilim-yuvasi-default-rtdb.europe-west1.firebasedatabase.app
-  VITE_FIREBASE_PROJECT_ID=ilim-yuvasi
-  VITE_FIREBASE_STORAGE_BUCKET=ilim-yuvasi.appspot.com
-  VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
-  VITE_FIREBASE_APP_ID=1:123456789:web:abcdef...
-  ```
+- **Misafir Girişi:** Hiçbir bilgi girmeden saniyeler içinde kütüphaneye oturup çalışmaya başlayabilirsin.
+- **Üye Girişi:** E-posta & şifre veya Google hesabınla giriş yaparak oturum geçmişini, takvimini ve karakterini bulutta kalıcı olarak saklayabilirsin.
+
+---
+
+<p align="center">
+  <b>Developed by EVA | All rights reserved © 2025</b><br>
+  <i>İlim ile aydınlanan, sabırla odaklanan herkese iyi çalışmalar dileriz.</i>
+</p>
