@@ -1,5 +1,29 @@
-# Logs
-logs
+# ==========================================
+# İlim Yuvası - Git Ignore & Güvenlik Kuralları
+# ==========================================
+
+# 1. Bağımlılıklar ve Derleme Çıktıları
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# 2. Ortam Değişkenleri & Gizli Yapılandırmalar (Kritik Güvenlik)
+# Tüm .env varyasyonlarını engelle, sadece şablon olan .env.example'a izin ver
+.env*
+!.env.example
+
+# 3. Firebase & Bulut Hizmet Anahtarları (Service Accounts & Certs)
+*serviceAccount*.json
+*firebase-admin*.json
+*credentials*.json
+*.pem
+*.key
+*.pfx
+*.p12
+
+# 4. Günlük ve Hata Kayıtları (Logs)
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,29 +31,32 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Node modules & Dependencies
-node_modules
-dist
-dist-ssr
-*.local
+# 5. TypeScript & Derleyici Önbellekleri
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+.vite/
+.cache/
+.turbo/
 
-# Environment variables & Firebase secret configs
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# 6. İşletim Sistemi Geçici Dosyaları (Windows, macOS, Linux)
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
 
-# Editor directories and files
+# 7. IDE ve Kod Editörü Dosyaları
+.idea/
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-
-# Temporary scratch & build artifacts
-*.tsbuildinfo
