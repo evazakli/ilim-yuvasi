@@ -54,7 +54,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         await registerWithEmail(email, password, displayName);
         onClose();
       } else if (tab === 'forgot') {
-        await sendPasswordReset(email);
+        await sendPasswordReset(email.trim());
         setSuccessMsg('Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.');
       }
     } catch (err: any) {

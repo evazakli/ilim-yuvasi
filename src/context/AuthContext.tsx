@@ -11,7 +11,8 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  fetchSignInMethodsForEmail
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
@@ -185,10 +186,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const sendPasswordReset = async (email: string) => {
-    if (!isFirebaseConfigured || !auth) {
-      throw new Error('Firebase bağlantısı henüz aktif değil.');
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+      const err: any = new Error('Geçerli bir e-posta adresi yazınız.');
+      err.code = 'auth/invalid-email';
+      throw err;
     }
-    await sendPasswordResetEmail(auth, email);
+
+    if (!isFirebaseConfigured || !auth) {
+      // Yerel mod kontrolü
+      const localUserStr = localStorage.getItem(LOCAL_USER_KEY);
+      if (localUserStr) {
+        try {
+          const localUser = JSON.parse(localUserStr);
+          if (localUser?.email && localUser.email.toLowerCase() === cleanEmail) {
+            throw new Error('Yerel moddasınız. Gerçek e-posta gönderimi için Firebase bulut bağlantısı gereklidir.');
+          }
+        } catch (e: any) {
+          if (e.message?.includes('Yerel moddasınız')) throw e;
+        }
+      }
+      const notFoundErr: any = new Error('Bu e-posta adresi ile kayıtlı bir hesap bulunamadı.');
+      notFoundErr.code = 'auth/user-not-found';
+      throw notFoundErr;
+    }
+
+    // 1. Firebase Auth üzerinde e-postanın kayıtlı olup olmadığını doğrula
+    try {
+      const methods = await fetchSignInMethodsForEmail(auth, cleanEmail);
+      if (!methods || methods.length === 0) {
+        const notFoundErr: any = new Error('Bu e-posta adresi ile kayıtlı bir hesap bulunamadı.');
+        notFoundErr.code = 'auth/user-not-found';
+        throw notFoundErr;
+      }
+    } catch (checkErr: any) {
+      if (checkErr?.code === 'auth/user-not-found' || checkErr?.code === 'auth/invalid-email') {
+        throw checkErr;
+      }
+    }
+
+    // 2. Hesap kayıtlıysa şifre yenileme bağlantısını gönder
+    await sendPasswordResetEmail(auth, cleanEmail);
   };
 
   const logout = async () => {
