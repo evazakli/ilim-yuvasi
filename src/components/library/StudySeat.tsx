@@ -9,7 +9,7 @@ interface StudySeatProps {
   seatIndex: SeatIndex;
   occupant: SeatOccupant | null;
   onSeatClick: (tableId: number, seatIndex: SeatIndex) => void;
-  onLeaveClick?: () => void;
+  onLeaveClick?: (tableId: number, seatIndex: SeatIndex) => void;
 }
 
 export const StudySeat: React.FC<StudySeatProps> = ({
@@ -157,9 +157,11 @@ export const StudySeat: React.FC<StudySeatProps> = ({
       {/* Quick Leave Button for Current User */}
       {isMySeat && onLeaveClick && (
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
-            onLeaveClick();
+            e.preventDefault();
+            onLeaveClick(tableId, seatIndex);
           }}
           className="mt-1.5 flex items-center justify-center gap-1 min-h-[34px] px-3 py-1 rounded-xl bg-rose-950/80 hover:bg-rose-900 border border-rose-500/50 text-rose-300 hover:text-white font-bold text-xs shadow-md active:scale-95 transition-all touch-manipulation z-20 cursor-pointer"
           title="Masadan Kalk"

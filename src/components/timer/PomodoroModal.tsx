@@ -44,9 +44,12 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
   const { theme } = useTheme();
   const { user } = useAuth();
 
-  const isMyCurrentSeat = mySeat?.tableId === tableId && mySeat?.seatIndex === seatIndex;
   const currentTable = tables.find(t => t.id === tableId);
   const currentOccupant = currentTable?.seats[seatIndex];
+  const isMyCurrentSeat = Boolean(
+    (mySeat?.tableId === tableId && mySeat?.seatIndex === seatIndex) ||
+    (user && currentOccupant && currentOccupant.uid === user.uid)
+  );
 
   // Responsive state
   const [isMobile, setIsMobile] = useState<boolean>(() => typeof window !== 'undefined' ? window.innerWidth < 640 : false);
@@ -63,6 +66,23 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
   const [inputBreak, setInputBreak] = useState<string>(String(breakMinutes));
   const [inputTask, setInputTask] = useState<string>(currentTask);
   const [errorMessage, setErrorMessage] = useState<string>('');
+
+  // Sync inputs whenever modal opens or chair changes
+  useEffect(() => {
+    if (isOpen) {
+      if (currentOccupant) {
+        setInputTask(currentOccupant.currentTask || currentTask || '');
+        if (currentOccupant.durationSeconds > 0) {
+          setInputWork(String(Math.round(currentOccupant.durationSeconds / 60)));
+        }
+      } else {
+        setInputTask(currentTask || '');
+        setInputWork(String(workMinutes || 25));
+        setInputBreak(String(breakMinutes || 5));
+      }
+      setErrorMessage('');
+    }
+  }, [isOpen, tableId, seatIndex]);
 
   // Daily goal progress
   const [todayGoalProgress, setTodayGoalProgress] = useState<{
@@ -150,13 +170,11 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
     setWorkMinutes(wM);
     setBreakMinutes(bM);
 
-    // Sit at this seat if not already seated here
-    if (!isMyCurrentSeat) {
-      const seated = sitAtSeat(tableId, seatIndex, taskName, wM);
-      if (!seated) {
-        setErrorMessage('Bu koltuk dolu veya oturulamadı.');
-        return;
-      }
+    // Sit at this seat and refresh occupant info
+    const seated = sitAtSeat(tableId, seatIndex, taskName, wM);
+    if (!seated) {
+      setErrorMessage('Bu koltuk dolu veya oturulamadı.');
+      return;
     }
 
     onSeatConnectedStart(taskName, wM, bM);
@@ -165,10 +183,8 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
   };
 
   const handleLeaveAndClose = () => {
-    if (mySeat) {
-      leaveSeat();
-      resetTimer();
-    }
+    leaveSeat(tableId, seatIndex);
+    resetTimer();
     onClose();
   };
 
@@ -386,8 +402,9 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
         <div className="sticky bottom-0 p-3 sm:p-4 border-t border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-between gap-2 shrink-0 z-20">
           {/* Left: Leave Chair or Close */}
           <div className="flex items-center gap-1.5">
-            {mySeat && (
+            {(mySeat || isMyCurrentSeat) && (
               <button
+                type="button"
                 onClick={handleLeaveAndClose}
                 className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-rose-300 hover:text-white bg-rose-950/60 hover:bg-rose-900 border border-rose-500/40 shadow-sm transition"
                 title="Masadaki yerinizi bırakın ve sayacı sıfırlayın"

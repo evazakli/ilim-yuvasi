@@ -48,13 +48,60 @@ class PresenceService {
       };
     }
 
-    // Window beforeunload hook to release seat immediately
+    // Window beforeunload and pagehide hooks to release seat on tab close / navigation
     if (typeof window !== 'undefined') {
-      window.addEventListener('beforeunload', () => {
+      const handleUnload = () => {
         if (this.mySeat) {
           this.leaveSeat(this.mySeat.tableId, this.mySeat.seatIndex);
         }
-      });
+      };
+      window.addEventListener('beforeunload', handleUnload);
+      window.addEventListener('pagehide', handleUnload);
+    }
+  }
+
+  private normalizeTables(rawTables: any[]): LibraryTable[] {
+    const initial = createInitialTables();
+    if (!Array.isArray(rawTables)) return initial;
+
+    return initial.map((initTable, idx) => {
+      const rawTable = rawTables[idx] || rawTables.find((t: any) => t && t.id === initTable.id);
+      if (!rawTable) return initTable;
+
+      const rawSeats = Array.isArray(rawTable.seats) ? rawTable.seats : [];
+      const seats: (SeatOccupant | null)[] = [
+        rawSeats[0] || null,
+        rawSeats[1] || null,
+        rawSeats[2] || null,
+        rawSeats[3] || null,
+      ];
+
+      return {
+        id: initTable.id,
+        number: initTable.number,
+        name: rawTable.name || initTable.name,
+        seats,
+      };
+    });
+  }
+
+  private cleanStaleOccupants() {
+    const now = Date.now();
+    let changed = false;
+    for (const table of this.tables) {
+      for (let s = 0; s < table.seats.length; s++) {
+        const occupant = table.seats[s];
+        if (occupant) {
+          const maxLifeMs = ((occupant.durationSeconds || 1500) + 1800) * 1000;
+          if (now - occupant.startedAt > maxLifeMs) {
+            table.seats[s] = null;
+            changed = true;
+          }
+        }
+      }
+    }
+    if (changed) {
+      this.saveToStorage();
     }
   }
 
@@ -63,12 +110,26 @@ class PresenceService {
       const saved = localStorage.getItem(`room_tables_${this.currentRoomId}`);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length === TOTAL_TABLES) {
-          this.tables = parsed;
+        this.tables = this.normalizeTables(parsed);
+      }
+      this.cleanStaleOccupants();
+
+      // Load saved seat
+      const savedMySeat = localStorage.getItem(`room_my_seat_${this.currentRoomId}`);
+      if (savedMySeat) {
+        const seat = JSON.parse(savedMySeat);
+        if (seat && typeof seat.tableId === 'number' && typeof seat.seatIndex === 'number') {
+          const table = this.tables.find(t => t.id === seat.tableId);
+          if (table && table.seats[seat.seatIndex]) {
+            this.mySeat = seat;
+          } else {
+            localStorage.removeItem(`room_my_seat_${this.currentRoomId}`);
+            this.mySeat = null;
+          }
         }
       }
     } catch {
-      // fallback to initial
+      this.tables = createInitialTables();
     }
   }
 
@@ -86,7 +147,7 @@ class PresenceService {
       onValue(roomRef, (snapshot) => {
         const data = snapshot.val();
         if (data && data.tables) {
-          this.tables = data.tables;
+          this.tables = this.normalizeTables(data.tables);
           this.saveToStorage();
           this.notifySubscribers();
         }
@@ -145,25 +206,46 @@ class PresenceService {
     this.notifySubscribers();
   }
 
-  public sitDown(tableId: number, seatIndex: number, occupant: SeatOccupant) {
+  public sitDown(tableId: number, seatIndex: number, occupant: SeatOccupant): boolean {
     const table = this.tables.find(t => t.id === tableId);
     if (!table) return false;
 
-    // If seat already taken by someone else
-    if (table.seats[seatIndex] && table.seats[seatIndex]?.uid !== occupant.uid) {
-      return false;
+    // Check if seat already taken by someone else (allow if expired)
+    const existing = table.seats[seatIndex];
+    if (existing && existing.uid !== occupant.uid) {
+      const isExpired = Date.now() - existing.startedAt > ((existing.durationSeconds || 1500) + 600) * 1000;
+      if (!isExpired) {
+        return false;
+      }
     }
 
-    // Leave existing seat if already seated elsewhere
-    if (this.mySeat) {
-      this.leaveSeat(this.mySeat.tableId, this.mySeat.seatIndex);
+    // Step 1: Clean any existing seat belonging to this user across all tables
+    for (const t of this.tables) {
+      for (let s = 0; s < t.seats.length; s++) {
+        if (t.seats[s]?.uid === occupant.uid) {
+          t.seats[s] = null;
+          this.broadcast({
+            type: 'SEAT_LEAVE',
+            roomId: this.currentRoomId,
+            tableId: t.id,
+            seatIndex: s
+          });
+        }
+      }
     }
 
+    // Step 2: Occupy the requested seat
     table.seats[seatIndex] = occupant;
     this.mySeat = { tableId, seatIndex };
-    this.saveToStorage();
-    this.notifySubscribers();
 
+    // Step 3: Persist both tables and mySeat
+    this.saveToStorage();
+    try {
+      localStorage.setItem(`room_my_seat_${this.currentRoomId}`, JSON.stringify(this.mySeat));
+    } catch {}
+
+    // Step 4: Notify React and peers
+    this.notifySubscribers();
     this.broadcast({
       type: 'SEAT_UPDATE',
       roomId: this.currentRoomId,
@@ -233,26 +315,73 @@ class PresenceService {
     }, 3000);
   }
 
-  public leaveSeat(tableId: number, seatIndex: number) {
-    const table = this.tables.find(t => t.id === tableId);
-    if (table) {
-      table.seats[seatIndex] = null;
+  public leaveSeat(tableId?: number, seatIndex?: number, uid?: string) {
+    // 1. If explicit table and seat specified, vacate it
+    if (tableId !== undefined && seatIndex !== undefined) {
+      const table = this.tables.find(t => t.id === tableId);
+      if (table && table.seats[seatIndex]) {
+        table.seats[seatIndex] = null;
+      }
+      this.broadcast({
+        type: 'SEAT_LEAVE',
+        roomId: this.currentRoomId,
+        tableId,
+        seatIndex
+      });
     }
 
-    if (this.mySeat?.tableId === tableId && this.mySeat?.seatIndex === seatIndex) {
+    // 2. If uid provided, vacate any seat matching this uid across all tables
+    if (uid) {
+      for (const t of this.tables) {
+        for (let s = 0; s < t.seats.length; s++) {
+          if (t.seats[s]?.uid === uid) {
+            t.seats[s] = null;
+            this.broadcast({
+              type: 'SEAT_LEAVE',
+              roomId: this.currentRoomId,
+              tableId: t.id,
+              seatIndex: s
+            });
+          }
+        }
+      }
+    }
+
+    // 3. Clear mySeat reference if it matched or if no specific seat was given
+    if (
+      (tableId === undefined && seatIndex === undefined) ||
+      (this.mySeat && tableId === this.mySeat.tableId && seatIndex === this.mySeat.seatIndex) ||
+      uid
+    ) {
       this.mySeat = null;
       this.stopHeartbeat();
+      try {
+        localStorage.removeItem(`room_my_seat_${this.currentRoomId}`);
+      } catch {}
     }
 
     this.saveToStorage();
     this.notifySubscribers();
+  }
 
-    this.broadcast({
-      type: 'SEAT_LEAVE',
-      roomId: this.currentRoomId,
-      tableId,
-      seatIndex
-    });
+  public leaveAllSeatsForUser(uid: string) {
+    this.leaveSeat(undefined, undefined, uid);
+  }
+
+  public findSeatForUser(uid: string): { tableId: number; seatIndex: number } | null {
+    if (!uid) return null;
+    for (const table of this.tables) {
+      for (let s = 0; s < table.seats.length; s++) {
+        if (table.seats[s]?.uid === uid) {
+          this.mySeat = { tableId: table.id, seatIndex: s };
+          try {
+            localStorage.setItem(`room_my_seat_${this.currentRoomId}`, JSON.stringify(this.mySeat));
+          } catch {}
+          return this.mySeat;
+        }
+      }
+    }
+    return null;
   }
 
   private startHeartbeat() {

@@ -174,7 +174,7 @@ export const LibraryHall: React.FC = () => {
                 Yönet
               </button>
               <button
-                onClick={leaveSeat}
+                onClick={() => leaveSeat(mySeat.tableId, mySeat.seatIndex)}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-300 hover:text-white bg-rose-950/80 hover:bg-rose-900 border border-rose-500/50 transition shadow"
                 title="Masadaki yerinizi bırakın ve sayacı sıfırlayın"
               >

@@ -9,7 +9,7 @@ interface LibraryContextType {
   mySeat: { tableId: number; seatIndex: number } | null;
   totalActiveCount: number;
   sitAtSeat: (tableId: number, seatIndex: SeatIndex, task: string, durationMinutes: number) => boolean;
-  leaveSeat: () => void;
+  leaveSeat: (targetTableId?: number, targetSeatIndex?: number) => void;
   sendReaction: (emoji: string) => void;
   selectedSeatForModal: { tableId: number; seatIndex: SeatIndex } | null;
   setSelectedSeatForModal: (val: { tableId: number; seatIndex: SeatIndex } | null) => void;
@@ -28,10 +28,14 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     const unsub = presenceService.subscribe((updatedTables) => {
       setTables(updatedTables);
-      setMySeat(presenceService.getMySeat());
+      let seat = presenceService.getMySeat();
+      if (!seat && user) {
+        seat = presenceService.findSeatForUser(user.uid);
+      }
+      setMySeat(seat);
     });
     return () => unsub();
-  }, []);
+  }, [user?.uid]);
 
   // Calculate total active students in the library
   const totalActiveCount = tables.reduce((acc, table) => {
@@ -72,11 +76,15 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return ok;
   };
 
-  const leaveSeat = () => {
-    if (mySeat) {
-      presenceService.leaveSeat(mySeat.tableId, mySeat.seatIndex);
-      setMySeat(null);
+  const leaveSeat = (targetTableId?: number, targetSeatIndex?: number) => {
+    if (targetTableId !== undefined && targetSeatIndex !== undefined) {
+      presenceService.leaveSeat(targetTableId, targetSeatIndex, user?.uid);
+    } else if (mySeat) {
+      presenceService.leaveSeat(mySeat.tableId, mySeat.seatIndex, user?.uid);
+    } else if (user) {
+      presenceService.leaveAllSeatsForUser(user.uid);
     }
+    setMySeat(null);
     resetTimer();
   };
 

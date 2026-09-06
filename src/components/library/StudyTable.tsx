@@ -5,7 +5,7 @@ import { StudySeat } from './StudySeat';
 interface StudyTableProps {
   table: LibraryTable;
   onSeatClick: (tableId: number, seatIndex: SeatIndex) => void;
-  onLeaveClick: () => void;
+  onLeaveClick: (tableId: number, seatIndex: SeatIndex) => void;
 }
 
 export const StudyTable: React.FC<StudyTableProps> = ({
