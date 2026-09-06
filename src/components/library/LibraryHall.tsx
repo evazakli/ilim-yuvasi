@@ -5,7 +5,8 @@ import { StudyTable } from './StudyTable';
 import { TableReactions } from './TableReactions';
 import { PomodoroModal } from '../timer/PomodoroModal';
 import { SeatIndex } from '../../types/library';
-import { Compass, Coffee, LogOut, UserCheck } from 'lucide-react';
+import { isFirebaseConfigured } from '../../services/firebase';
+import { Compass, Coffee, LogOut, UserCheck, Flame } from 'lucide-react';
 
 export const LibraryHall: React.FC = () => {
   const { tables, mySeat, leaveSeat } = useLibrary();
@@ -63,7 +64,7 @@ export const LibraryHall: React.FC = () => {
           </div>
 
           {/* Quick Room Status Chips */}
-          <div className="flex items-center justify-center gap-2 text-xs font-medium w-full md:w-auto">
+          <div className="flex items-center justify-center gap-2 text-xs font-medium w-full md:w-auto flex-wrap">
             <div className="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] text-slate-300 flex items-center gap-1.5 text-[11px] sm:text-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
               <span>{emptyCount} Boş Koltuk</span>
@@ -73,6 +74,21 @@ export const LibraryHall: React.FC = () => {
               <Coffee className="w-3.5 h-3.5 text-amber-400" />
               <span>8 Masa</span>
             </div>
+
+            {isFirebaseConfigured ? (
+              <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 flex items-center gap-1.5 text-[11px] sm:text-xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Bulut Aktif</span>
+              </div>
+            ) : (
+              <div
+                className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 flex items-center gap-1.5 text-[11px] sm:text-xs"
+                title="Farklı cihazlardaki arkadaşlarınızı canlı görmek için Firebase bağlantısı gereklidir."
+              >
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
+                <span>Yerel Mod (Bulut Yok)</span>
+              </div>
+            )}
           </div>
         </div>
 

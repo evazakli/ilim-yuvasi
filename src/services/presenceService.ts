@@ -1,6 +1,7 @@
 import { LibraryTable, SeatOccupant, TableReaction } from '../types/library';
-import { rtdb, isFirebaseConfigured } from './firebase';
-import { ref, onValue, set, remove, onDisconnect, off } from 'firebase/database';
+import { rtdb, firestore, isFirebaseConfigured } from './firebase';
+import { ref, onValue, set, remove, onDisconnect } from 'firebase/database';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 
 export interface RoomSyncPayload {
   type: 'SEAT_UPDATE' | 'SEAT_LEAVE' | 'REACTION' | 'HEARTBEAT';
@@ -142,16 +143,44 @@ class PresenceService {
   }
 
   private initFirebaseListeners() {
+    // 1. Realtime Database Listener
     if (isFirebaseConfigured && rtdb) {
-      const roomRef = ref(rtdb, `rooms/${this.currentRoomId}`);
-      onValue(roomRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data && data.tables) {
-          this.tables = this.normalizeTables(data.tables);
-          this.saveToStorage();
-          this.notifySubscribers();
-        }
-      });
+      try {
+        const roomRef = ref(rtdb, `rooms/${this.currentRoomId}`);
+        onValue(roomRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data && data.tables) {
+            this.tables = this.normalizeTables(data.tables);
+            this.saveToStorage();
+            this.notifySubscribers();
+          }
+        }, (error) => {
+          console.warn('[Firebase RTDB] Okuma izni reddedildi veya hata:', error);
+        });
+      } catch (err) {
+        console.warn('[Firebase RTDB] Listener hatası:', err);
+      }
+    }
+
+    // 2. Cloud Firestore Real-time Listener (Hybrid fallback & cross-sync)
+    if (isFirebaseConfigured && firestore) {
+      try {
+        const roomDocRef = doc(firestore, 'rooms', this.currentRoomId);
+        onSnapshot(roomDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data && data.tables) {
+              this.tables = this.normalizeTables(data.tables);
+              this.saveToStorage();
+              this.notifySubscribers();
+            }
+          }
+        }, (error) => {
+          console.warn('[Firebase Firestore] Okuma izni reddedildi veya hata:', error);
+        });
+      } catch (err) {
+        console.warn('[Firebase Firestore] Listener hatası:', err);
+      }
     }
   }
 
@@ -172,13 +201,35 @@ class PresenceService {
       this.channel.postMessage(payload);
     }
 
+    // 1. Realtime Database write
     if (isFirebaseConfigured && rtdb) {
-      const tableRef = ref(rtdb, `rooms/${payload.roomId}/tables/${payload.tableId - 1}/seats/${payload.seatIndex}`);
-      if (payload.type === 'SEAT_LEAVE') {
-        remove(tableRef).catch(console.warn);
-      } else if (payload.occupant) {
-        set(tableRef, payload.occupant).catch(console.warn);
-        onDisconnect(tableRef).remove();
+      try {
+        const tableRef = ref(rtdb, `rooms/${payload.roomId}/tables/${payload.tableId - 1}/seats/${payload.seatIndex}`);
+        if (payload.type === 'SEAT_LEAVE') {
+          remove(tableRef).catch(e => console.warn('[Firebase RTDB] Koltuk silme hatası:', e));
+        } else if (payload.occupant) {
+          set(tableRef, payload.occupant).catch(e => console.warn('[Firebase RTDB] Koltuk güncelleme hatası:', e));
+          try {
+            onDisconnect(tableRef).remove();
+          } catch {}
+        }
+      } catch (err) {
+        console.warn('[Firebase RTDB] Broadcast hatası:', err);
+      }
+    }
+
+    // 2. Cloud Firestore write (Sync entire room state so any client receives update instantly)
+    if (isFirebaseConfigured && firestore) {
+      try {
+        const roomDocRef = doc(firestore, 'rooms', payload.roomId);
+        setDoc(roomDocRef, {
+          tables: this.tables,
+          lastUpdated: Date.now()
+        }, { merge: true }).catch(e => {
+          console.warn('[Firebase Firestore] Masa güncelleme hatası (Kuralları kontrol edin):', e);
+        });
+      } catch (err) {
+        console.warn('[Firebase Firestore] Broadcast hatası:', err);
       }
     }
   }

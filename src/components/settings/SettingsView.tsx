@@ -385,8 +385,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onBack }) => {
                         <li>Proje Genel Bakış sayfasında <strong>Web (&lt;/&gt;)</strong> simgesine tıklayıp uygulamanızı ekleyin.</li>
                         <li>Size verilen <code className="bg-black/40 px-1 py-0.5 rounded text-amber-300">firebaseConfig</code> kodunu kopyalayıp yukarıdaki kutucuğa yapıştırın.</li>
                         <li>Sol menüden <strong>Authentication</strong> açıp <em>Email/Password</em> ve <em>Google</em> giriş yöntemlerini aktifleştirin.</li>
-                        <li><strong>Firestore Database</strong> ve canlı masalar için <strong>Realtime Database</strong> oluşturup kuralları kaydedin.</li>
+                        <li><strong>Firestore Database</strong> oluşturun (Test modunda veya Kurallar: <code className="bg-black/40 px-1 py-0.5 rounded text-amber-300">allow read, write: if true;</code>).</li>
+                        <li><strong>Realtime Database</strong> oluşturun (Kurallar sekmesine <code className="bg-black/40 px-1 py-0.5 rounded text-amber-300">{`{"rules": {".read": true, ".write": true}}`}</code> yapıştırıp Yayınlayın).</li>
                       </ol>
+                      <div className="p-2.5 rounded-lg bg-blue-950/40 border border-blue-500/30 text-[11px] text-blue-300">
+                        💡 <strong>Önemli Not:</strong> Burada girdiğiniz bilgiler yalnızca bu tarayıcıya kaydedilir. Arkadaşınızın da sizinle aynı salonda buluşabilmesi için ya arkadaşınızın da kendi cihazındaki Ayarlar'a aynı bilgileri girmesi gerekir ya da bilgilerinizi geliştiriciye ileterek genel siteye (.env) eklenmesini sağlayabilirsiniz.
+                      </div>
                     </div>
                   )}
                 </div>
