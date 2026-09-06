@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { usePomodoro } from '../../context/PomodoroContext';
 import { useLibrary } from '../../context/LibraryContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -188,16 +189,25 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+  const modalContent = (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <div
-        className="relative w-full max-w-lg rounded-3xl border border-slate-700/60 shadow-2xl overflow-hidden flex flex-col max-h-[92dvh] sm:max-h-[90vh]"
+        className="relative w-full max-w-lg rounded-t-3xl sm:rounded-3xl border-t sm:border border-slate-700/60 shadow-2xl overflow-hidden flex flex-col max-h-[85dvh] sm:max-h-[90vh] animate-slide-up sm:animate-fade-in"
         style={{ backgroundColor: theme.primary }}
+        onClick={(e) => e.stopPropagation()}
       >
+        {/* Mobile Pull Handle */}
+        <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-2.5 sm:hidden" />
+
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-black/30 shrink-0">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-sky-500/20 border border-sky-500/30 flex items-center justify-center text-sky-400 shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-2.5 sm:py-3.5 border-b border-white/10 bg-black/30 shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-sky-500/20 border border-sky-500/30 flex items-center justify-center text-sky-400 shrink-0">
               <Clock className="w-4 h-4" />
             </div>
             <div className="min-w-0">
@@ -214,29 +224,30 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
           <button
             onClick={onClose}
             className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition shrink-0"
+            aria-label="Kapat"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Modal Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 flex flex-col items-center space-y-3 sm:space-y-4">
+        {/* Modal Body */}
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-5 flex flex-col space-y-3">
           {!isRunning ? (
-            /* === SETUP / SITTING DOWN MODE: DURATION & TASK DIRECTLY VISIBLE WITHOUT SCROLLING === */
-            <div className="w-full space-y-3 animate-fade-in">
+            /* === SETUP / SITTING DOWN MODE: COMPACT & ZERO-SCROLL === */
+            <div className="w-full space-y-2.5 animate-fade-in">
               {/* PRIMARY: Duration Definition Box */}
-              <div className="w-full bg-black/30 p-3 sm:p-4 rounded-2xl border border-white/10 space-y-2.5 shadow-inner">
+              <div className="w-full bg-black/30 p-2.5 sm:p-3.5 rounded-2xl border border-white/10 space-y-2 shadow-inner">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-white flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-amber-400" />
                     <span>⏱️ Süre Belirleme</span>
                   </label>
-                  <span className="text-[11px] font-mono font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] sm:text-[11px] font-mono font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-full">
                     {inputWork || 25} dk Odak · {inputBreak || 5} dk Mola
                   </span>
                 </div>
 
-                {/* Quick Preset Buttons (Large, comfortable touch targets) */}
+                {/* Quick Presets */}
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     { label: '25 / 5 dk', w: 25, b: 5, desc: 'Klasik' },
@@ -250,7 +261,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
                         key={preset.label}
                         type="button"
                         onClick={() => handlePreset(preset.w, preset.b)}
-                        className={`py-2 px-1 sm:px-2 rounded-xl text-xs font-bold transition border text-center flex flex-col items-center justify-center gap-0.5 ${
+                        className={`py-2 px-1 rounded-xl text-xs font-bold transition border text-center flex flex-col items-center justify-center gap-0.5 ${
                           isSelected
                             ? 'bg-blue-600 border-blue-400 text-white shadow-lg ring-1 ring-blue-400 scale-[1.02]'
                             : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white'
@@ -263,10 +274,10 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
                   })}
                 </div>
 
-                {/* Custom Minutes Inputs */}
+                {/* Custom Minutes Row */}
                 <div className="flex items-center justify-around gap-2 bg-black/40 p-2 rounded-xl border border-white/10 text-xs text-slate-300">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-slate-400 font-medium">Çalışma:</span>
+                    <span className="text-slate-400 font-medium text-[11px]">Çalışma:</span>
                     <input
                       type="number"
                       min="1"
@@ -285,7 +296,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
                   <div className="w-[1px] h-5 bg-white/10" />
 
                   <div className="flex items-center gap-1.5">
-                    <span className="text-slate-400 font-medium">Mola:</span>
+                    <span className="text-slate-400 font-medium text-[11px]">Mola:</span>
                     <input
                       type="number"
                       min="1"
@@ -304,7 +315,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
               </div>
 
               {/* Task Input Section */}
-              <div className="w-full bg-black/30 p-3 sm:p-4 rounded-2xl border border-white/10 space-y-1.5">
+              <div className="w-full bg-black/30 p-2.5 sm:p-3 rounded-2xl border border-white/10 space-y-1.5">
                 <label className="text-xs font-bold text-white block">
                   ✍️ Çalışma Göreviniz:
                 </label>
@@ -316,17 +327,20 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
                     setInputTask(e.target.value);
                     setErrorMessage('');
                   }}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 focus:border-blue-500 text-xs sm:text-sm text-white placeholder-slate-400 outline-none transition"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleStart();
+                  }}
+                  className="w-full px-3 py-2 sm:py-2.5 rounded-xl bg-black/50 border border-white/15 focus:border-blue-500 text-xs sm:text-sm text-white placeholder-slate-400 outline-none transition"
                 />
                 {errorMessage && (
-                  <p className="text-xs text-rose-400 font-medium pt-1">{errorMessage}</p>
+                  <p className="text-xs text-rose-400 font-medium pt-0.5">{errorMessage}</p>
                 )}
               </div>
 
-              {/* Upcoming Event Ticker (if any) */}
+              {/* Upcoming Event Ticker */}
               {upcomingEventStr && (
                 <div
-                  className="text-[11px] font-bold px-3 py-1 rounded-xl bg-white/5 border border-white/10 truncate max-w-full text-center"
+                  className="text-[11px] font-semibold px-3 py-1 rounded-xl bg-white/5 border border-white/10 truncate text-center"
                   style={{ color: theme.textAccent }}
                 >
                   📅 {upcomingEventStr}
@@ -336,7 +350,6 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
           ) : (
             /* === RUNNING SESSION MODE: BIG COUNTDOWN & CLOCK === */
             <div className="w-full flex flex-col items-center space-y-3 sm:space-y-4 animate-fade-in">
-              {/* Analog Clock on sm+ screens */}
               <div className="hidden sm:block my-1 shrink-0">
                 <AnalogClock
                   remainingSeconds={remainingSeconds}
@@ -346,12 +359,10 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
                 />
               </div>
 
-              {/* Digital Timer */}
               <div className="mt-1 text-5xl font-extrabold tracking-tight font-mono text-white select-none">
                 {formatRemainingSeconds(remainingSeconds)}
               </div>
 
-              {/* Status Label */}
               <div
                 className={`text-xs sm:text-sm font-semibold tracking-wide ${
                   isWorkTime ? 'text-emerald-400' : 'text-sky-400'
@@ -360,7 +371,6 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
                 {statusText}
               </div>
 
-              {/* Active Task Info */}
               <div className="w-full bg-black/30 p-3 rounded-2xl border border-white/10 text-center">
                 <span className="text-[11px] text-slate-400 font-medium">Şu Anki Görev:</span>
                 <p className="text-sm font-bold text-white mt-0.5 truncate">
@@ -368,7 +378,6 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
                 </p>
               </div>
 
-              {/* Upcoming Event Ticker */}
               {upcomingEventStr && (
                 <div
                   className="mt-1 text-[11px] font-bold px-3 py-0.5 rounded-full bg-white/5 border border-white/10 truncate max-w-full"
@@ -377,59 +386,57 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
                   📅 {upcomingEventStr}
                 </div>
               )}
+
+              {/* Daily Goals Collapsible in Running Mode */}
+              <div className="w-full">
+                <button
+                  onClick={() => setShowGoals(!showGoals)}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs text-slate-300 transition"
+                >
+                  <div className="flex items-center gap-2">
+                    <Target className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Günlük Hedef & İlerleme Özeti</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
+                    <span>%{todayGoalProgress.taskPct}</span>
+                    {showGoals ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                  </div>
+                </button>
+
+                {showGoals && (
+                  <div className="mt-2 p-3 rounded-xl bg-black/20 border border-white/10 space-y-2.5 animate-fade-in">
+                    <div>
+                      <div className="flex justify-between text-[11px] text-slate-300 font-medium mb-1">
+                        <span>{todayGoalProgress.taskStr}</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                          style={{ width: `${todayGoalProgress.taskPct}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-[11px] text-slate-300 font-medium mb-1">
+                        <span>{todayGoalProgress.timeStr}</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                          style={{ width: `${todayGoalProgress.timePct}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
-
-          {/* SECONDARY: Collapsible Daily Goals & Progress */}
-          <div className="w-full">
-            <button
-              onClick={() => setShowGoals(!showGoals)}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs text-slate-300 transition"
-            >
-              <div className="flex items-center gap-2">
-                <Target className="w-3.5 h-3.5 text-blue-400" />
-                <span>Günlük Hedef & İlerleme Özeti</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
-                <span>%{todayGoalProgress.taskPct}</span>
-                {showGoals ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-              </div>
-            </button>
-
-            {showGoals && (
-              <div className="mt-2 p-3 rounded-xl bg-black/20 border border-white/10 space-y-2.5 animate-fade-in">
-                {/* Task Goal Progress */}
-                <div>
-                  <div className="flex justify-between text-[11px] text-slate-300 font-medium mb-1">
-                    <span>{todayGoalProgress.taskStr}</span>
-                  </div>
-                  <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-500 rounded-full transition-all duration-300"
-                      style={{ width: `${todayGoalProgress.taskPct}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Time Goal Progress */}
-                <div>
-                  <div className="flex justify-between text-[11px] text-slate-300 font-medium mb-1">
-                    <span>{todayGoalProgress.timeStr}</span>
-                  </div>
-                  <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-emerald-500 rounded-full transition-all duration-300"
-                      style={{ width: `${todayGoalProgress.timePct}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Action Buttons Sticky Footer */}
-        <div className="sticky bottom-0 p-3 sm:p-4 border-t border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-between gap-2 shrink-0 z-20">
+        <div className="sticky bottom-0 p-3 sm:p-4 border-t border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-between gap-2 shrink-0 z-20 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
           {/* Left: Leave Chair or Close */}
           <div className="flex items-center gap-1.5">
             {(mySeat || isMyCurrentSeat) && (
@@ -447,26 +454,28 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
               onClick={onClose}
               className="px-3 py-2 text-xs font-semibold text-slate-400 hover:text-white transition"
             >
-              {mySeat ? 'Kapat' : 'Kapat'}
+              Kapat
             </button>
           </div>
 
           {/* Right: Timer Controls */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={resetTimer}
-              className="flex items-center gap-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold text-white transition shadow"
-              style={{ backgroundColor: theme.resetButton }}
-              title="Zamanlayıcıyı Sıfırla"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Sıfırla</span>
-            </button>
+            {isRunning && (
+              <button
+                onClick={resetTimer}
+                className="flex items-center gap-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold text-white transition shadow"
+                style={{ backgroundColor: theme.resetButton }}
+                title="Zamanlayıcıyı Sıfırla"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Sıfırla</span>
+              </button>
+            )}
 
             {!isRunning ? (
               <button
                 onClick={handleStart}
-                className="flex items-center gap-1.5 px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs font-bold text-white transition shadow-lg"
+                className="flex items-center gap-1.5 px-5 sm:px-6 py-2.5 rounded-xl text-xs font-bold text-white transition shadow-lg hover:brightness-110 active:scale-95"
                 style={{ backgroundColor: theme.button }}
               >
                 <Play className="w-4 h-4 fill-white" />
@@ -475,7 +484,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
             ) : (
               <button
                 onClick={pauseTimer}
-                className="flex items-center gap-1.5 px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-500 transition shadow-lg"
+                className="flex items-center gap-1.5 px-5 sm:px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-500 transition shadow-lg active:scale-95"
               >
                 <Pause className="w-4 h-4 fill-white" />
                 <span>Duraklat</span>
@@ -486,5 +495,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : null;
 };
 
