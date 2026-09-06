@@ -157,12 +157,15 @@ export const StudySeat: React.FC<StudySeatProps> = ({
       {/* Quick Leave Button for Current User */}
       {isMySeat && onLeaveClick && (
         <button
-          onClick={onLeaveClick}
-          className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 px-2 py-0.5 rounded-lg border border-rose-500/20 transition"
+          onClick={(e) => {
+            e.stopPropagation();
+            onLeaveClick();
+          }}
+          className="mt-1.5 flex items-center justify-center gap-1 min-h-[34px] px-3 py-1 rounded-xl bg-rose-950/80 hover:bg-rose-900 border border-rose-500/50 text-rose-300 hover:text-white font-bold text-xs shadow-md active:scale-95 transition-all touch-manipulation z-20 cursor-pointer"
           title="Masadan Kalk"
         >
-          <LogOut className="w-3 h-3" />
-          Kalk
+          <LogOut className="w-3.5 h-3.5 text-rose-400" />
+          <span>Masadan Kalk</span>
         </button>
       )}
     </div>

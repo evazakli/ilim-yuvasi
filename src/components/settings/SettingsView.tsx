@@ -303,7 +303,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onBack }) => {
                     </div>
                   </div>
 
-                  <div className="text-xs text-slate-300 space-y-1 bg-black/30 p-2.5 rounded-lg border border-slate-800 font-mono text-[11px]">
+                  <div className="text-xs text-slate-300 space-y-1 bg-black/30 p-2.5 rounded-lg border border-slate-800 font-mono text-[11px] break-all max-w-full overflow-hidden">
                     <div><strong className="text-slate-400 font-sans">Proje ID:</strong> {activeFirebaseConfig.projectId}</div>
                     <div><strong className="text-slate-400 font-sans">Auth Domain:</strong> {activeFirebaseConfig.authDomain}</div>
                     {activeFirebaseConfig.databaseURL && (

@@ -23,7 +23,7 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [selectedSeatForModal, setSelectedSeatForModal] = useState<{ tableId: number; seatIndex: SeatIndex } | null>(null);
 
   const { user } = useAuth();
-  const { isRunning, isWorkTime, remainingSeconds, totalSeconds, currentTask } = usePomodoro();
+  const { isRunning, isWorkTime, remainingSeconds, totalSeconds, currentTask, resetTimer } = usePomodoro();
 
   useEffect(() => {
     const unsub = presenceService.subscribe((updatedTables) => {
@@ -77,6 +77,7 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
       presenceService.leaveSeat(mySeat.tableId, mySeat.seatIndex);
       setMySeat(null);
     }
+    resetTimer();
   };
 
   const sendReaction = (emoji: string) => {
