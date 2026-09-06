@@ -75,13 +75,15 @@ export const StudySeat: React.FC<StudySeatProps> = ({
         </div>
       )}
 
-      {/* Seated Avatar Pod */}
-      <div
-        className={`relative rounded-2xl p-1.5 transition-all duration-300 ${
+      {/* Seated Avatar Pod (Clickable to manage timer) */}
+      <button
+        onClick={() => onSeatClick(tableId, seatIndex)}
+        className={`relative rounded-2xl p-1.5 transition-all duration-300 cursor-pointer text-left ${
           isMySeat
-            ? 'ring-2 ring-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20'
+            ? 'ring-2 ring-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20 hover:ring-blue-400'
             : 'bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.08]'
         }`}
+        title={isMySeat ? 'Masayı ve sayacı yönetmek için tıkla' : `${occupant.displayName} - Süreyi görmek için tıkla`}
       >
         {/* Status Pill Badge */}
         <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center shadow-lg">
@@ -137,7 +139,7 @@ export const StudySeat: React.FC<StudySeatProps> = ({
             </span>
           </div>
         )}
-      </div>
+      </button>
 
       {/* Name and Task Label */}
       <div className="mt-1.5 flex flex-col items-center max-w-[95px] text-center">

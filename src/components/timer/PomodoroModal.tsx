@@ -7,7 +7,7 @@ import { AnalogClock } from './AnalogClock';
 import { SeatIndex } from '../../types/library';
 import { storageService } from '../../services/storageService';
 import { formatRemainingSeconds, calculateEventCountdown, formatDateDDMMYYYY } from '../../utils/timeFormatter';
-import { X, Play, Pause, RotateCcw, LogOut, CheckCircle2, Calendar, Target, Clock } from 'lucide-react';
+import { X, Play, Pause, RotateCcw, LogOut, CheckCircle2, Calendar, Target, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface PomodoroModalProps {
   tableId: number;
@@ -47,6 +47,16 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
   const isMyCurrentSeat = mySeat?.tableId === tableId && mySeat?.seatIndex === seatIndex;
   const currentTable = tables.find(t => t.id === tableId);
   const currentOccupant = currentTable?.seats[seatIndex];
+
+  // Responsive state
+  const [isMobile, setIsMobile] = useState<boolean>(() => typeof window !== 'undefined' ? window.innerWidth < 640 : false);
+  const [showGoals, setShowGoals] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Local inputs for custom minutes
   const [inputWork, setInputWork] = useState<string>(String(workMinutes));
@@ -161,184 +171,225 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
       <div
-        className="relative w-full max-w-lg rounded-3xl border border-slate-700/60 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
+        className="relative w-full max-w-lg rounded-3xl border border-slate-700/60 shadow-2xl overflow-hidden flex flex-col max-h-[92dvh] sm:max-h-[90vh]"
         style={{ backgroundColor: theme.primary }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-black/20">
-          <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-sky-400" />
-            <div>
-              <h3 className="text-sm font-bold text-white">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-black/30 shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-sky-500/20 border border-sky-500/30 flex items-center justify-center text-sky-400 shrink-0">
+              <Clock className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-xs sm:text-sm font-bold text-white truncate">
                 Masa {tableId} — Koltuk {seatIndex + 1}
               </h3>
-              <p className="text-[11px] text-slate-300">
+              <p className="text-[10px] sm:text-[11px] text-slate-300 truncate">
                 {currentOccupant && !isMyCurrentSeat
-                  ? `${currentOccupant.displayName} şu an bu masada çalışıyor`
-                  : 'İlim yuvasında masaya otur ve odaklan'}
+                  ? `${currentOccupant.displayName} çalışıyor`
+                  : 'Süreyi belirleyin ve odaklanmaya başlayın'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center">
-          {/* Analog Clock Canvas */}
-          <div className="my-1">
-            <AnalogClock
-              remainingSeconds={remainingSeconds}
-              totalSeconds={totalSeconds}
-              size={210}
-              bgColor={theme.primary}
-            />
-          </div>
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col items-center space-y-4">
+          {/* Clock & Timer Presentation */}
+          <div className="flex flex-col items-center select-none w-full">
+            {/* Analog Clock - Compact on mobile */}
+            <div className="my-1 shrink-0">
+              <AnalogClock
+                remainingSeconds={remainingSeconds}
+                totalSeconds={totalSeconds}
+                size={isMobile ? 120 : 180}
+                bgColor={theme.primary}
+              />
+            </div>
 
-          {/* Large Digital Timer */}
-          <div className="mt-2 text-5xl font-extrabold tracking-tight font-mono text-white select-none">
-            {formatRemainingSeconds(remainingSeconds)}
-          </div>
+            {/* Digital Timer */}
+            <div className="mt-1 text-4xl sm:text-5xl font-extrabold tracking-tight font-mono text-white select-none">
+              {formatRemainingSeconds(remainingSeconds)}
+            </div>
 
-          {/* Status Label */}
-          <div
-            className={`mt-1 text-sm font-semibold tracking-wide ${
-              isWorkTime ? 'text-emerald-400' : 'text-sky-400'
-            }`}
-          >
-            {statusText}
-          </div>
-
-          {/* Upcoming Event Ticker */}
-          {upcomingEventStr && (
+            {/* Status Label */}
             <div
-              className="mt-2 text-xs font-bold px-3 py-1 rounded-full bg-white/5 border border-white/10"
-              style={{ color: theme.textAccent }}
+              className={`text-xs sm:text-sm font-semibold tracking-wide ${
+                isWorkTime ? 'text-emerald-400' : 'text-sky-400'
+              }`}
             >
-              📅 {upcomingEventStr}
-            </div>
-          )}
-
-          {/* Goal Progress Bars */}
-          <div className="w-full mt-4 space-y-2.5 px-2">
-            {/* Task Goal Progress */}
-            <div>
-              <div className="flex justify-between text-[11px] text-slate-300 font-medium mb-1">
-                <span>{todayGoalProgress.taskStr}</span>
-              </div>
-              <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-500 rounded-full transition-all duration-300"
-                  style={{ width: `${todayGoalProgress.taskPct}%` }}
-                />
-              </div>
+              {statusText}
             </div>
 
-            {/* Time Goal Progress */}
-            <div>
-              <div className="flex justify-between text-[11px] text-slate-300 font-medium mb-1">
-                <span>{todayGoalProgress.timeStr}</span>
+            {/* Upcoming Event Ticker */}
+            {upcomingEventStr && (
+              <div
+                className="mt-1.5 text-[11px] font-bold px-3 py-0.5 rounded-full bg-white/5 border border-white/10 truncate max-w-full"
+                style={{ color: theme.textAccent }}
+              >
+                📅 {upcomingEventStr}
               </div>
-              <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-emerald-500 rounded-full transition-all duration-300"
-                  style={{ width: `${todayGoalProgress.timePct}%` }}
-                />
+            )}
+          </div>
+
+          {/* PRIMARY WORKFLOW: Task Input & Duration Definition */}
+          <div className="w-full bg-black/25 p-3.5 sm:p-4 rounded-2xl border border-white/10 space-y-3">
+            {/* Task Input */}
+            <div>
+              <label className="text-[11px] font-semibold text-slate-300 block mb-1">
+                ✍️ Çalışma Görevi:
+              </label>
+              <input
+                type="text"
+                placeholder="Örn: Matematik Soru Çözümü, Tez Yazımı..."
+                value={inputTask}
+                disabled={isRunning}
+                onChange={(e) => {
+                  setInputTask(e.target.value);
+                  setErrorMessage('');
+                }}
+                className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl bg-black/40 border border-white/15 focus:border-blue-500 text-xs sm:text-sm text-white placeholder-slate-400 outline-none transition disabled:opacity-60"
+              />
+            </div>
+
+            {/* Error notification */}
+            {errorMessage && (
+              <p className="text-xs text-rose-400 font-medium">{errorMessage}</p>
+            )}
+
+            {/* Duration Presets & Inputs */}
+            <div>
+              <label className="text-[11px] font-semibold text-slate-300 block mb-1.5">
+                ⏱️ Süre Belirleme:
+              </label>
+
+              {/* Quick Preset Buttons */}
+              <div className="grid grid-cols-3 gap-2 mb-2.5">
+                {[
+                  { label: '25 / 5 dk', w: 25, b: 5 },
+                  { label: '50 / 10 dk', w: 50, b: 10 },
+                  { label: '90 / 15 dk', w: 90, b: 15 },
+                ].map(preset => {
+                  const isSelected =
+                    parseInt(inputWork, 10) === preset.w && parseInt(inputBreak, 10) === preset.b;
+                  return (
+                    <button
+                      key={preset.label}
+                      disabled={isRunning}
+                      onClick={() => handlePreset(preset.w, preset.b)}
+                      className={`py-2 px-2 rounded-xl text-xs font-bold transition border text-center ${
+                        isSelected
+                          ? 'bg-blue-600 border-blue-400 text-white shadow-md'
+                          : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
+                      } disabled:opacity-50`}
+                    >
+                      {preset.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Custom Minutes Inputs */}
+              <div className="flex items-center justify-around gap-2 bg-black/30 p-2 rounded-xl border border-white/10 text-xs text-slate-300">
+                <div className="flex items-center gap-1.5">
+                  <span>Çalışma:</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="180"
+                    disabled={isRunning}
+                    value={inputWork}
+                    onChange={(e) => setInputWork(e.target.value)}
+                    className="w-14 px-2 py-1 rounded-lg bg-black/50 border border-white/20 text-center font-bold text-white outline-none disabled:opacity-50"
+                  />
+                  <span className="text-slate-400 text-[11px]">dk</span>
+                </div>
+
+                <div className="w-[1px] h-5 bg-white/10" />
+
+                <div className="flex items-center gap-1.5">
+                  <span>Mola:</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="60"
+                    disabled={isRunning}
+                    value={inputBreak}
+                    onChange={(e) => setInputBreak(e.target.value)}
+                    className="w-14 px-2 py-1 rounded-lg bg-black/50 border border-white/20 text-center font-bold text-white outline-none disabled:opacity-50"
+                  />
+                  <span className="text-slate-400 text-[11px]">dk</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Task Input */}
-          <div className="w-full mt-5">
-            <input
-              type="text"
-              placeholder="Şu anki göreviniz nedir? (Örn: Matematik Tekrarı)"
-              value={inputTask}
-              disabled={isRunning}
-              onChange={(e) => {
-                setInputTask(e.target.value);
-                setErrorMessage('');
-              }}
-              className="w-full px-4 py-2.5 rounded-xl bg-black/30 border border-white/10 focus:border-blue-500 text-sm text-white placeholder-slate-400 outline-none transition disabled:opacity-60"
-            />
-          </div>
-
-          {/* Error notification if empty task */}
-          {errorMessage && (
-            <p className="text-xs text-rose-400 mt-2 font-medium">{errorMessage}</p>
-          )}
-
-          {/* Duration Presets & Inputs */}
-          <div className="w-full mt-4 flex flex-col items-center gap-3">
-            {/* Preset Buttons */}
-            <div className="flex flex-wrap justify-center gap-2">
-              {[
-                { label: '25 / 5 dk', w: 25, b: 5 },
-                { label: '50 / 10 dk', w: 50, b: 10 },
-                { label: '90 / 15 dk', w: 90, b: 15 },
-              ].map(preset => (
-                <button
-                  key={preset.label}
-                  disabled={isRunning}
-                  onClick={() => handlePreset(preset.w, preset.b)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition border ${
-                    parseInt(inputWork, 10) === preset.w && parseInt(inputBreak, 10) === preset.b
-                      ? 'bg-blue-600 border-blue-400 text-white shadow'
-                      : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
-                  } disabled:opacity-50`}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Custom Minutes Inputs */}
-            <div className="flex items-center gap-4 text-xs text-slate-300">
-              <div className="flex items-center gap-1.5">
-                <span>Çalışma (dk):</span>
-                <input
-                  type="number"
-                  min="1"
-                  max="180"
-                  disabled={isRunning}
-                  value={inputWork}
-                  onChange={(e) => setInputWork(e.target.value)}
-                  className="w-14 px-2 py-1 rounded-lg bg-black/30 border border-white/15 text-center font-bold text-white outline-none disabled:opacity-50"
-                />
+          {/* SECONDARY: Collapsible Daily Goals & Progress */}
+          <div className="w-full">
+            <button
+              onClick={() => setShowGoals(!showGoals)}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs text-slate-300 transition"
+            >
+              <div className="flex items-center gap-2">
+                <Target className="w-3.5 h-3.5 text-blue-400" />
+                <span>Günlük Hedef & İlerleme Özeti</span>
               </div>
-
-              <div className="flex items-center gap-1.5">
-                <span>Mola (dk):</span>
-                <input
-                  type="number"
-                  min="1"
-                  max="60"
-                  disabled={isRunning}
-                  value={inputBreak}
-                  onChange={(e) => setInputBreak(e.target.value)}
-                  className="w-14 px-2 py-1 rounded-lg bg-black/30 border border-white/15 text-center font-bold text-white outline-none disabled:opacity-50"
-                />
+              <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
+                <span>%{todayGoalProgress.taskPct}</span>
+                {showGoals ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
               </div>
-            </div>
+            </button>
+
+            {showGoals && (
+              <div className="mt-2 p-3 rounded-xl bg-black/20 border border-white/10 space-y-2.5 animate-fade-in">
+                {/* Task Goal Progress */}
+                <div>
+                  <div className="flex justify-between text-[11px] text-slate-300 font-medium mb-1">
+                    <span>{todayGoalProgress.taskStr}</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                      style={{ width: `${todayGoalProgress.taskPct}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Time Goal Progress */}
+                <div>
+                  <div className="flex justify-between text-[11px] text-slate-300 font-medium mb-1">
+                    <span>{todayGoalProgress.timeStr}</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                      style={{ width: `${todayGoalProgress.timePct}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Action Buttons Footer */}
-        <div className="p-5 border-t border-white/10 bg-black/20 flex items-center justify-between gap-3">
-          {/* Left: Leave Chair */}
+        {/* Action Buttons Sticky Footer */}
+        <div className="sticky bottom-0 p-3 sm:p-4 border-t border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-between gap-2 shrink-0 z-20">
+          {/* Left: Leave Chair or Close */}
           {isMyCurrentSeat ? (
             <button
               onClick={handleLeaveAndClose}
               className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/15 transition border border-rose-500/30"
             >
               <LogOut className="w-3.5 h-3.5" />
-              Masadan Kalk
+              <span>Masadan Kalk</span>
             </button>
           ) : (
             <button
@@ -353,30 +404,30 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={resetTimer}
-              className="flex items-center gap-1 px-4 py-2.5 rounded-xl text-xs font-bold text-white transition shadow"
+              className="flex items-center gap-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold text-white transition shadow"
               style={{ backgroundColor: theme.resetButton }}
               title="Zamanlayıcıyı Sıfırla"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              Sıfırla
+              <span className="hidden sm:inline">Sıfırla</span>
             </button>
 
             {!isRunning ? (
               <button
                 onClick={handleStart}
-                className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl text-xs font-bold text-white transition shadow-lg"
+                className="flex items-center gap-1.5 px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs font-bold text-white transition shadow-lg"
                 style={{ backgroundColor: theme.button }}
               >
                 <Play className="w-4 h-4 fill-white" />
-                {isMyCurrentSeat ? 'Başlat' : 'Otur ve Başlat'}
+                <span>{isMyCurrentSeat ? 'Başlat' : 'Otur ve Başlat'}</span>
               </button>
             ) : (
               <button
                 onClick={pauseTimer}
-                className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-500 transition shadow-lg"
+                className="flex items-center gap-1.5 px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-500 transition shadow-lg"
               >
                 <Pause className="w-4 h-4 fill-white" />
-                Duraklat
+                <span>Duraklat</span>
               </button>
             )}
           </div>
@@ -385,3 +436,4 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({
     </div>
   );
 };
+

@@ -101,6 +101,13 @@ export const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({ isOpen, onCl
 
   const [activeTab, setActiveTab] = useState<'skin' | 'hair' | 'outfit' | 'accessory' | 'desk'>('hair');
   const [previewState, setPreviewState] = useState<CharacterState>('working');
+  const [isMobile, setIsMobile] = useState<boolean>(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -123,13 +130,13 @@ export const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({ isOpen, onCl
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-2xl bg-[#1E1E2E] border border-slate-700/60 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-2xl bg-[#1E1E2E] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92dvh] sm:max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-[#181825]">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800 bg-[#181825] shrink-0">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-amber-400" />
-            <h2 className="text-lg font-bold text-white">Karakterini Tasarla</h2>
+            <h2 className="text-base sm:text-lg font-bold text-white">Karakterini Tasarla</h2>
           </div>
           <button
             onClick={onClose}
@@ -140,48 +147,50 @@ export const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({ isOpen, onCl
         </div>
 
         {/* Content Body */}
-        <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-5 gap-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-6">
           {/* Left: Avatar Live Preview */}
-          <div className="md:col-span-2 flex flex-col items-center justify-center p-6 bg-[#181825] rounded-xl border border-slate-800">
-            <div className="relative p-4 rounded-2xl bg-gradient-to-b from-slate-800/40 to-slate-900/80 border border-slate-700/50 shadow-inner flex items-center justify-center">
-              <AvatarRenderer config={config} state={previewState} size={150} />
+          <div className="md:col-span-2 flex flex-col sm:flex-row md:flex-col items-center justify-center p-3.5 sm:p-5 bg-[#181825] rounded-2xl border border-slate-800 gap-3">
+            <div className="relative p-2.5 sm:p-4 rounded-2xl bg-gradient-to-b from-slate-800/40 to-slate-900/80 border border-slate-700/50 shadow-inner flex items-center justify-center shrink-0">
+              <AvatarRenderer config={config} state={previewState} size={isMobile ? 85 : 140} />
             </div>
 
-            {/* Preview Animation State Switcher */}
-            <div className="mt-4 flex gap-1 p-1 bg-slate-900/90 rounded-lg border border-slate-800 text-xs">
+            <div className="flex flex-col items-center gap-2 w-full">
+              {/* Preview Animation State Switcher */}
+              <div className="flex gap-1 p-1 bg-slate-900/90 rounded-xl border border-slate-800 text-[11px]">
+                <button
+                  onClick={() => setPreviewState('idle')}
+                  className={`px-2 py-1 rounded-lg transition ${previewState === 'idle' ? 'bg-blue-600 text-white font-medium' : 'text-slate-400 hover:text-white'}`}
+                >
+                  Boşta
+                </button>
+                <button
+                  onClick={() => setPreviewState('working')}
+                  className={`px-2 py-1 rounded-lg transition ${previewState === 'working' ? 'bg-emerald-600 text-white font-medium' : 'text-slate-400 hover:text-white'}`}
+                >
+                  Çalışıyor ✍️
+                </button>
+                <button
+                  onClick={() => setPreviewState('break')}
+                  className={`px-2 py-1 rounded-lg transition ${previewState === 'break' ? 'bg-amber-600 text-white font-medium' : 'text-slate-400 hover:text-white'}`}
+                >
+                  Molada ☕
+                </button>
+              </div>
+
               <button
-                onClick={() => setPreviewState('idle')}
-                className={`px-2.5 py-1 rounded transition ${previewState === 'idle' ? 'bg-blue-600 text-white font-medium' : 'text-slate-400 hover:text-white'}`}
+                onClick={handleRandomize}
+                className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-sky-400 transition py-1"
               >
-                Boşta
-              </button>
-              <button
-                onClick={() => setPreviewState('working')}
-                className={`px-2.5 py-1 rounded transition ${previewState === 'working' ? 'bg-emerald-600 text-white font-medium' : 'text-slate-400 hover:text-white'}`}
-              >
-                Çalışıyor ✍️
-              </button>
-              <button
-                onClick={() => setPreviewState('break')}
-                className={`px-2.5 py-1 rounded transition ${previewState === 'break' ? 'bg-amber-600 text-white font-medium' : 'text-slate-400 hover:text-white'}`}
-              >
-                Molada ☕
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Rastgele Karakter</span>
               </button>
             </div>
-
-            <button
-              onClick={handleRandomize}
-              className="mt-4 flex items-center gap-1.5 text-xs text-slate-400 hover:text-sky-400 transition"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              Rastgele Karakter Yarat
-            </button>
           </div>
 
           {/* Right: Customization Controls */}
           <div className="md:col-span-3 flex flex-col">
             {/* Category Tabs */}
-            <div className="flex border-b border-slate-800 pb-2 gap-2 overflow-x-auto">
+            <div className="flex border-b border-slate-800 pb-2 gap-1.5 overflow-x-auto scrollbar-none">
               {[
                 { id: 'hair', label: 'Saç' },
                 { id: 'skin', label: 'Ten' },
@@ -358,8 +367,8 @@ export const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({ isOpen, onCl
           </div>
         </div>
 
-        {/* Footer Buttons */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-800 bg-[#181825]">
+        {/* Footer Buttons Sticky */}
+        <div className="sticky bottom-0 flex items-center justify-end gap-3 px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-800 bg-[#181825] z-10 shrink-0">
           <button
             onClick={onClose}
             className="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white transition"

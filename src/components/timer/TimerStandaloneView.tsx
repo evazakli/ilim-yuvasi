@@ -30,6 +30,14 @@ export const TimerStandaloneView: React.FC<TimerStandaloneViewProps> = ({ onNavi
 
   const { theme } = useTheme();
 
+  const [isMobile, setIsMobile] = useState<boolean>(() => typeof window !== 'undefined' ? window.innerWidth < 640 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [inputWork, setInputWork] = useState<string>(String(workMinutes));
   const [inputBreak, setInputBreak] = useState<string>(String(breakMinutes));
   const [errorMsg, setErrorMsg] = useState<string>('');
@@ -106,10 +114,10 @@ export const TimerStandaloneView: React.FC<TimerStandaloneViewProps> = ({ onNavi
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 md:p-6 animate-fade-in flex flex-col items-center">
+    <div className="max-w-md mx-auto p-3 sm:p-4 md:p-6 animate-fade-in flex flex-col items-center">
       {/* Main Content Card with rounded corners matching Python CustomTkinter (corner_radius=20) */}
       <div
-        className="w-full p-6 md:p-8 rounded-[24px] shadow-2xl border border-white/10 flex flex-col items-center select-none"
+        className="w-full p-4 sm:p-6 md:p-8 rounded-[24px] shadow-2xl border border-white/10 flex flex-col items-center select-none"
         style={{ backgroundColor: theme.primary }}
       >
         {/* Analog Clock */}
@@ -117,19 +125,19 @@ export const TimerStandaloneView: React.FC<TimerStandaloneViewProps> = ({ onNavi
           <AnalogClock
             remainingSeconds={remainingSeconds}
             totalSeconds={totalSeconds}
-            size={240}
+            size={isMobile ? 140 : 220}
             bgColor={theme.primary}
           />
         </div>
 
         {/* Digital Timer Display */}
-        <div className="mt-3 text-6xl font-extrabold tracking-tight font-mono text-white">
+        <div className="mt-2 sm:mt-3 text-4xl sm:text-6xl font-extrabold tracking-tight font-mono text-white">
           {formatRemainingSeconds(remainingSeconds)}
         </div>
 
         {/* Status Label */}
         <div
-          className={`mt-1 text-base font-semibold ${
+          className={`mt-1 text-sm sm:text-base font-semibold ${
             isWorkTime ? 'text-[#6CCF59]' : 'text-[#59A5CF]'
           }`}
         >

@@ -43,9 +43,9 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ onBack }) => {
   const selectedGroup = selectedDate ? groupedByDate[selectedDate] : null;
 
   return (
-    <div className="max-w-5xl mx-auto p-4 md:p-8 animate-fade-in">
+    <div className="max-w-5xl mx-auto p-3.5 sm:p-6 md:p-8 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
         <button
           onClick={onBack}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 transition"
@@ -53,21 +53,21 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ onBack }) => {
           <ArrowLeft className="w-4 h-4" />
           Geri
         </button>
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+        <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
           <span>📜 Geçmiş Kayıtlar</span>
         </h2>
       </div>
 
       {/* 2-Pane Container matching Python CustomTkinter */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 min-h-[500px]">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 min-h-[400px]">
         {/* Left Pane: Dates List (col-span-5) */}
-        <div className="md:col-span-5 p-4 rounded-2xl bg-[#232A36] border border-slate-700/50 shadow-xl flex flex-col">
-          <div className="flex items-center gap-2 pb-3 border-b border-slate-700/60 mb-3">
+        <div className="md:col-span-5 p-3.5 sm:p-4 rounded-2xl bg-[#232A36] border border-slate-700/50 shadow-xl flex flex-col">
+          <div className="flex items-center gap-2 pb-2.5 sm:pb-3 border-b border-slate-700/60 mb-3">
             <Calendar className="w-4 h-4 text-sky-400" />
             <h3 className="text-sm font-bold text-slate-200">Tarihler</h3>
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-[600px]">
+          <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-[220px] md:max-h-[600px]">
             {sortedDates.length === 0 ? (
               <p className="text-xs text-slate-400 text-center py-10">Henüz kayıt yok.</p>
             ) : (

@@ -17,7 +17,7 @@ export const TableReactions: React.FC = () => {
   if (!mySeat) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 animate-fade-in flex items-center gap-1.5 px-3 py-2 rounded-full bg-slate-900/90 border border-amber-600/40 shadow-2xl backdrop-blur-md">
+    <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-40 animate-fade-in flex items-center gap-1.5 px-3 py-2 rounded-full bg-slate-900/90 border border-amber-600/40 shadow-2xl backdrop-blur-md">
       <div className="flex items-center gap-1 text-[11px] font-semibold text-amber-300 pr-2 border-r border-slate-700">
         <Sparkles className="w-3.5 h-3.5 text-amber-400" />
         <span className="hidden sm:inline">Masa Tepkileri:</span>

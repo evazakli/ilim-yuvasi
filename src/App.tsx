@@ -59,26 +59,26 @@ export const App: React.FC = () => {
       />
 
       {/* Active Screen Content */}
-      <div className="relative z-10 flex-1 w-full pb-20 md:pb-8">
+      <div className="relative z-10 flex-1 w-full pb-24 md:pb-8">
         {renderView()}
       </div>
 
-      {/* Mobile Bottom Navigation Bar (Synchronized for md breakpoint) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0E1017]/95 border-t border-white/[0.08] backdrop-blur-xl px-2 py-2 flex items-center justify-around shadow-2xl">
+      {/* Mobile Bottom Navigation Bar (Synchronized for md breakpoint with iOS safe area) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0E1017]/95 border-t border-white/[0.08] backdrop-blur-xl px-1 py-1.5 pb-[calc(0.4rem+env(safe-area-inset-bottom,0px))] flex items-center justify-around shadow-2xl overflow-x-auto scrollbar-none">
         {navTabs.map(tab => {
           const isActive = currentView === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => setCurrentView(tab.id)}
-              className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all ${
+              className={`flex flex-col items-center justify-center py-1 px-1.5 sm:px-2 rounded-xl text-[9px] sm:text-[10px] font-semibold transition-all shrink-0 min-w-[44px] ${
                 isActive
-                  ? 'text-blue-400 font-bold bg-blue-500/10'
+                  ? 'text-blue-400 font-bold bg-blue-500/15'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               {tab.icon}
-              <span className="mt-1">{tab.label}</span>
+              <span className="mt-0.5 whitespace-nowrap">{tab.label}</span>
             </button>
           );
         })}

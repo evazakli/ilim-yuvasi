@@ -69,9 +69,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 md:p-8 animate-fade-in">
+    <div className="max-w-4xl mx-auto p-3.5 sm:p-6 md:p-8 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
         <button
           onClick={onBack}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 transition"
@@ -79,13 +79,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onBack }) => {
           <ArrowLeft className="w-4 h-4" />
           Geri
         </button>
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+        <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
           <span>📅 Takvim & Etkinlik Geri Sayımı</span>
         </h2>
       </div>
 
       {/* Add Event Card */}
-      <div className="p-5 rounded-2xl bg-[#232A36] border border-slate-700/60 shadow-xl mb-6">
+      <div className="p-4 sm:p-5 rounded-2xl bg-[#232A36] border border-slate-700/60 shadow-xl mb-4 sm:mb-6">
         <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
           <Plus className="w-4 h-4 text-sky-400" />
           Yeni Etkinlik Ekle

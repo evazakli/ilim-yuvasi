@@ -27,10 +27,10 @@ export const StatsView: React.FC<StatsViewProps> = ({ onBack }) => {
   const niceMax = maxVal > 15 ? Math.ceil(maxVal / 15) * 15 : 60;
 
   return (
-    <div className="max-w-5xl mx-auto p-4 md:p-8 animate-fade-in">
+    <div className="max-w-5xl mx-auto p-3.5 sm:p-6 md:p-8 animate-fade-in">
       {/* Header & Period Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="flex items-center gap-3 sm:gap-4">
           <button
             onClick={onBack}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 transition"
@@ -38,18 +38,18 @@ export const StatsView: React.FC<StatsViewProps> = ({ onBack }) => {
             <ArrowLeft className="w-4 h-4" />
             Geri
           </button>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
             <span>📊 İstatistikler</span>
           </h2>
         </div>
 
         {/* Period Segmented Buttons */}
-        <div className="flex rounded-xl bg-[#1A202C] p-1 border border-slate-700">
+        <div className="flex rounded-xl bg-[#1A202C] p-1 border border-slate-700 overflow-x-auto scrollbar-none">
           {(['Günlük', 'Haftalık', 'Aylık', 'Yıllık'] as StatsPeriod[]).map(p => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ${
                 period === p ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -60,7 +60,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ onBack }) => {
       </div>
 
       {/* 4 Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
         {/* Toplam Süre */}
         <div className="p-4 rounded-2xl bg-[#232A36] border border-slate-700/60 shadow-lg relative overflow-hidden">
           <div className="w-full h-1 bg-[#e67e22] absolute top-0 left-0" />
@@ -108,8 +108,8 @@ export const StatsView: React.FC<StatsViewProps> = ({ onBack }) => {
       </div>
 
       {/* Dynamic Bar Chart Card */}
-      <div className="p-6 rounded-2xl bg-[#232A36] border border-slate-700/60 shadow-xl">
-        <h3 className="text-sm font-bold text-white mb-6 flex items-center gap-2">
+      <div className="p-4 sm:p-6 rounded-2xl bg-[#232A36] border border-slate-700/60 shadow-xl overflow-x-auto">
+        <h3 className="text-sm font-bold text-white mb-4 sm:mb-6 flex items-center gap-2">
           <BarChart3 className="w-4 h-4 text-sky-400" />
           {period} Aktivite Grafiği
         </h3>

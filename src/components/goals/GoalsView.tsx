@@ -124,9 +124,9 @@ export const GoalsView: React.FC<GoalsViewProps> = ({ onBack }) => {
   const timeProgress = goal.targetTime > 0 ? Math.min(1.0, actualWorkMinutes / goal.targetTime) : 0;
 
   return (
-    <div className="max-w-3xl mx-auto p-4 md:p-8 animate-fade-in">
+    <div className="max-w-3xl mx-auto p-3.5 sm:p-6 md:p-8 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
         <button
           onClick={onBack}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 transition"
@@ -134,13 +134,13 @@ export const GoalsView: React.FC<GoalsViewProps> = ({ onBack }) => {
           <ArrowLeft className="w-4 h-4" />
           Geri
         </button>
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+        <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
           <span>🎯 Günlük Hedefler</span>
         </h2>
       </div>
 
       {/* Date Navigation Bar */}
-      <div className="flex items-center justify-between p-3 rounded-2xl bg-[#232A36] border border-slate-700/60 shadow-lg mb-6">
+      <div className="flex items-center justify-between p-2.5 sm:p-3 rounded-2xl bg-[#232A36] border border-slate-700/60 shadow-lg mb-4 sm:mb-6">
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrevDay}
@@ -175,7 +175,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({ onBack }) => {
       {/* Content Area */}
       {isToday ? (
         /* TODAY'S GOALS SETTER */
-        <div className="p-6 rounded-2xl bg-[#232A36] border border-slate-700/60 shadow-xl space-y-6">
+        <div className="p-4 sm:p-6 rounded-2xl bg-[#232A36] border border-slate-700/60 shadow-xl space-y-4 sm:space-y-6">
           {/* Segmented Button */}
           <div className="flex rounded-xl bg-[#1A202C] p-1 border border-slate-700">
             <button
