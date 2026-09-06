@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <circle cx="24" cy="24" r="23" fill="#151824" stroke="#F59E0B" stroke-width="2"/>
+  <circle cx="24" cy="24" r="18" fill="#F59E0B" opacity="0.3"/>
+  <!-- Yuva Kubbesi -->
+  <path d="M 12 36 C 12 20 36 20 36 36" stroke="#F59E0B" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <!-- Odak Çemberi -->
+  <circle cx="24" cy="24" r="19" stroke="#60A5FA" stroke-width="2" stroke-dasharray="4 5" fill="none" opacity="0.8"/>
+  <!-- Meşale / Kıvılcım -->
+  <path d="M 24 10 C 24 10 29 17 29 22 C 29 24.76 26.76 27 24 27 C 21.24 27 19 24.76 19 22 C 19 17 24 10 24 10 Z" fill="#F59E0B"/>
+  <circle cx="24" cy="22" r="2.5" fill="#FFFBEB"/>
+  <path d="M 16 38 L 32 38" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
