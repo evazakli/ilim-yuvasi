@@ -398,6 +398,27 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onBack }) => {
             </div>
           )}
         </div>
+
+        {/* GitHub Proje Sayfası & Canlı Bağlantı */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#232A36] border border-slate-700/60 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+              <span>🏛️ İlim Yuvası V0.4</span>
+            </h4>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Sosyal Pomodoro ve Sanal Kütüphane Çalışma Alanı
+            </p>
+          </div>
+          <a
+            href="https://evazakli.github.io/ilim-yuvasi/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 shadow-md transition whitespace-nowrap w-full sm:w-auto"
+          >
+            <span>GitHub Proje Sayfası</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        </div>
       </div>
 
       <AvatarCustomizer

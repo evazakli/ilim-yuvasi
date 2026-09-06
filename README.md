@@ -7,6 +7,19 @@ Tek başına çalışırken motivasyonunu korumakta veya dikkatini toplamakta zo
 
 ---
 
+<div align="center">
+
+### 🌐 [İlim Yuvası V0.4 — Canlı Web Uygulaması](https://evazakli.github.io/ilim-yuvasi/)
+
+[![GitHub Proje Sayfası](https://img.shields.io/badge/🌐_GitHub_Proje_Sayfası-İlim_Yuvası_V0.4'e_Doğrudan_Git-blue?style=for-the-badge&logo=googlechrome&logoColor=white)](https://evazakli.github.io/ilim-yuvasi/)  
+[![Canlı Kütüphane](https://img.shields.io/badge/🪑_Canlı_Kütüphaneye_Katıl-Tıkla_ve_Başla-emerald?style=for-the-badge)](https://evazakli.github.io/ilim-yuvasi/)
+
+👉 **Doğrudan projeye gitmek için tıklayın:** **[https://evazakli.github.io/ilim-yuvasi/](https://evazakli.github.io/ilim-yuvasi/)**
+
+</div>
+
+---
+
 ## ✨ Neden İlim Yuvası?
 
 - 🪑 **Sanal 4 Kişilik Masalar:** Boş bir sandalyeye otur, çalışma hedefini belirle ve masandaki diğer insanlarla aynı anda odaklanmanın gücünü hisset.
@@ -94,5 +107,6 @@ Karanlık ve sakin çalışma ortamları için özenle seçilmiş renk paletleri
 
 <p align="center">
   <b>Developed by EVA | All rights reserved © 2025</b><br>
-  <i>İlim ile aydınlanan, sabırla odaklanan herkese iyi çalışmalar dileriz.</i>
+  <i>İlim ile aydınlanan, sabırla odaklanan herkese iyi çalışmalar dileriz.</i><br><br>
+  👉 <a href="https://evazakli.github.io/ilim-yuvasi/"><b>🌐 İlim Yuvası V0.4 Canlı Proje Sayfası</b></a>
 </p>

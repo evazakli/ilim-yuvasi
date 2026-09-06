@@ -2,6 +2,7 @@
   "name": "ilim-yuvasi-pomodoro",
   "private": true,
   "version": "1.0.0",
+  "homepage": "https://evazakli.github.io/ilim-yuvasi/",
   "type": "module",
   "scripts": {
     "dev": "vite",
