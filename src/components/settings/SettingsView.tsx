@@ -3,7 +3,28 @@ import { useTheme } from '../../context/ThemeContext';
 import { usePomodoro } from '../../context/PomodoroContext';
 import { soundManager } from '../../utils/audioSynth';
 import { AvatarCustomizer } from '../avatar/AvatarCustomizer';
-import { ArrowLeft, Palette, Bell, Volume2, Upload, Sparkles, Check } from 'lucide-react';
+import {
+  isFirebaseConfigured,
+  getStoredFirebaseConfig,
+  saveCustomFirebaseConfig,
+  clearCustomFirebaseConfig,
+  parseFirebaseSnippet
+} from '../../services/firebase';
+import {
+  ArrowLeft,
+  Palette,
+  Bell,
+  Volume2,
+  Upload,
+  Sparkles,
+  Check,
+  Flame,
+  CheckCircle2,
+  AlertCircle,
+  HelpCircle,
+  Trash2,
+  ExternalLink
+} from 'lucide-react';
 
 interface SettingsViewProps {
   onBack: () => void;
@@ -16,9 +37,46 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onBack }) => {
   const [isThemeOpen, setIsThemeOpen] = useState<boolean>(true);
   const [isSoundOpen, setIsSoundOpen] = useState<boolean>(true);
   const [isAvatarOpen, setIsAvatarOpen] = useState<boolean>(false);
+  const [isFirebaseOpen, setIsFirebaseOpen] = useState<boolean>(!isFirebaseConfigured);
+  const [firebaseSnippet, setFirebaseSnippet] = useState<string>('');
+  const [firebaseError, setFirebaseError] = useState<string>('');
+  const [showSetupGuide, setShowSetupGuide] = useState<boolean>(false);
   const [customSounds, setCustomSounds] = useState<string[]>(() => soundManager.getCustomSoundsList());
 
+  const activeFirebaseConfig = getStoredFirebaseConfig();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleSaveFirebase = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFirebaseError('');
+    if (!firebaseSnippet.trim()) {
+      setFirebaseError('Lütfen Firebase Console yapılandırma kodunuzu yapıştırın.');
+      return;
+    }
+
+    const parsed = parseFirebaseSnippet(firebaseSnippet);
+    if (!parsed.apiKey || !parsed.projectId) {
+      setFirebaseError('Geçerli bir Firebase yapılandırması tespit edilemedi. apiKey ve projectId alanlarının olduğundan emin olun.');
+      return;
+    }
+
+    saveCustomFirebaseConfig({
+      apiKey: parsed.apiKey,
+      authDomain: parsed.authDomain || `${parsed.projectId}.firebaseapp.com`,
+      databaseURL: parsed.databaseURL || `https://${parsed.projectId}-default-rtdb.firebaseio.com`,
+      projectId: parsed.projectId,
+      storageBucket: parsed.storageBucket || `${parsed.projectId}.appspot.com`,
+      messagingSenderId: parsed.messagingSenderId || '',
+      appId: parsed.appId || '',
+      measurementId: parsed.measurementId || ''
+    });
+  };
+
+  const handleClearFirebase = () => {
+    if (window.confirm('Firebase yapılandırmasını kaldırmak ve yerel moda dönmek istediğinize emin misiniz?')) {
+      clearCustomFirebaseConfig();
+    }
+  };
 
   const defaultSounds = [
     { id: 'warning.mp3', label: 'Acil Durum Alarmı' },
@@ -201,6 +259,138 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onBack }) => {
                   + Kendi Ses Dosyanı Yükle (.mp3, .wav)
                 </button>
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Firebase Bulut & Canlı Senkronizasyon Ayarları */}
+        <div className="p-4 sm:p-6 rounded-2xl bg-[#232A36] border border-slate-700/60 shadow-xl">
+          <button
+            onClick={() => setIsFirebaseOpen(!isFirebaseOpen)}
+            className="w-full flex items-center justify-between text-left pb-2 border-b border-slate-700/80"
+          >
+            <div className="flex items-center gap-2 text-sm font-bold text-white">
+              <Flame className="w-4 h-4 text-amber-500" />
+              <span>Firebase Bulut & Çok Oyunculu Bağlantısı</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {isFirebaseConfigured ? (
+                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-500/40 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Bağlı
+                </span>
+              ) : (
+                <span className="text-[10px] font-semibold text-amber-300 bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                  Yerel Mod
+                </span>
+              )}
+              <span className="text-xs text-slate-400 font-medium">
+                {isFirebaseOpen ? '▼' : '▶'}
+              </span>
+            </div>
+          </button>
+
+          {isFirebaseOpen && (
+            <div className="space-y-4 mt-4">
+              {isFirebaseConfigured ? (
+                /* Connected State Card */
+                <div className="p-4 rounded-xl bg-slate-900/80 border border-emerald-500/30 space-y-3">
+                  <div className="flex items-center gap-2.5 text-emerald-400">
+                    <CheckCircle2 className="w-5 h-5 shrink-0" />
+                    <div>
+                      <div className="text-xs font-bold text-white">Firebase Bulutu Aktif</div>
+                      <div className="text-[11px] text-slate-400">Kütüphanedeki diğer öğrencilerle ve arkadaşlarınızla canlı senkronizasyon çalışıyor.</div>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-slate-300 space-y-1 bg-black/30 p-2.5 rounded-lg border border-slate-800 font-mono text-[11px]">
+                    <div><strong className="text-slate-400 font-sans">Proje ID:</strong> {activeFirebaseConfig.projectId}</div>
+                    <div><strong className="text-slate-400 font-sans">Auth Domain:</strong> {activeFirebaseConfig.authDomain}</div>
+                    {activeFirebaseConfig.databaseURL && (
+                      <div className="truncate"><strong className="text-slate-400 font-sans">Canlı Masa (RTDB):</strong> {activeFirebaseConfig.databaseURL}</div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      onClick={handleClearFirebase}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-rose-300 bg-rose-950/40 hover:bg-rose-950/70 border border-rose-500/30 transition"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Bağlantıyı Sıfırla / Kaldır
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Not Connected State */
+                <div className="space-y-3">
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Arkadaşlarınızla farklı cihazlardan aynı sanal kütüphanede buluşmak ve kullanıcı hesaplarını saklamak için Firebase yapılandırmanızı tanımlayabilirsiniz.
+                  </p>
+
+                  <form onSubmit={handleSaveFirebase} className="space-y-3">
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-400 block mb-1">
+                        Firebase Yapılandırma Kodu (firebaseConfig)
+                      </label>
+                      <textarea
+                        rows={5}
+                        placeholder={'const firebaseConfig = {\n  apiKey: "AIzaSy...",\n  authDomain: "proje.firebaseapp.com",\n  projectId: "proje",\n  ...\n};'}
+                        value={firebaseSnippet}
+                        onChange={(e) => setFirebaseSnippet(e.target.value)}
+                        className="w-full p-3 rounded-xl bg-slate-900 border border-slate-800 focus:border-amber-500 text-xs font-mono text-white placeholder-slate-600 outline-none transition"
+                      />
+                    </div>
+
+                    {firebaseError && (
+                      <div className="p-2.5 rounded-lg bg-rose-950/60 border border-rose-500/40 text-xs text-rose-300 flex items-center gap-1.5">
+                        <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                        <span>{firebaseError}</span>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setShowSetupGuide(!showSetupGuide)}
+                        className="flex items-center justify-center gap-1.5 text-xs text-amber-400 hover:text-amber-300 py-1"
+                      >
+                        <HelpCircle className="w-3.5 h-3.5" />
+                        <span>{showSetupGuide ? 'Rehberi Gizle' : 'Firebase Nasıl Kurulur? (Adım Adım)'}</span>
+                      </button>
+
+                      <button
+                        type="submit"
+                        className="flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-500 shadow-md shadow-amber-600/20 transition"
+                      >
+                        <Check className="w-4 h-4" />
+                        Kaydet ve Bağlan
+                      </button>
+                    </div>
+                  </form>
+
+                  {/* Collapsible Setup Guide */}
+                  {showSetupGuide && (
+                    <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300 space-y-2.5 animate-fade-in">
+                      <div className="font-bold text-white flex items-center gap-1.5">
+                        <span>🔥 5 Adımda Ücretsiz Firebase Kurulumu:</span>
+                      </div>
+                      <ol className="list-decimal list-inside space-y-1.5 text-[11px] text-slate-300">
+                        <li>
+                          <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="text-sky-400 underline inline-flex items-center gap-0.5">
+                            Firebase Console <ExternalLink className="w-3 h-3" />
+                          </a>{' '}
+                          üzerinden ücretsiz bir proje oluşturun.
+                        </li>
+                        <li>Proje Genel Bakış sayfasında <strong>Web (&lt;/&gt;)</strong> simgesine tıklayıp uygulamanızı ekleyin.</li>
+                        <li>Size verilen <code className="bg-black/40 px-1 py-0.5 rounded text-amber-300">firebaseConfig</code> kodunu kopyalayıp yukarıdaki kutucuğa yapıştırın.</li>
+                        <li>Sol menüden <strong>Authentication</strong> açıp <em>Email/Password</em> ve <em>Google</em> giriş yöntemlerini aktifleştirin.</li>
+                        <li><strong>Firestore Database</strong> ve canlı masalar için <strong>Realtime Database</strong> oluşturup kuralları kaydedin.</li>
+                      </ol>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
